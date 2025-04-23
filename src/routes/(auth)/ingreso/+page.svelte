@@ -2,6 +2,7 @@
   import { fade } from 'svelte/transition'
   // import { redirect } from '@sveltejs/kit'
   import { goto } from '$app/navigation'
+  import { Button, TextField } from 'noph-ui'
 
   let email = $state('')
   let emailErr = $state('')
@@ -37,53 +38,52 @@
   <div class="mt-10 px-4 sm:mx-auto sm:w-full sm:max-w-[480px] sm:px-0">
     <div class="bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12">
       <div class="space-y-6">
-        <div>
-          <label
-            for="email"
-            class="block text-sm/6 font-medium text-gray-900 {emailErr && 'text-red-600'}"
-            >Email</label
+        <div class="mt-2">
+          <TextField
+            type="email"
+            label="Email"
+            bind:value={email}
+            variant="outlined"
+            class="w-full"
+            error={emailErr.length > 0}
+            errorText={emailErr}
+            --np-outlined-text-field-label-text-color="var(--color-indigo-600)"
+            --np-outlined-text-field-focus-outline-color="var(--color-indigo-400)"
+            onfocus={() => {
+              emailErr = ''
+            }}
           >
-          <div class="mt-2 {emailErr && 'grid grid-cols-1'}">
-            <input
-              type="email"
-              name="email"
-              id="email"
-              autocomplete="email"
-              class={emailErr
-                ? 'col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pr-10 pl-3 text-base text-red-900 outline-1 -outline-offset-1 outline-red-300 placeholder:text-red-300 focus:outline-2 focus:-outline-offset-2 focus:outline-red-600 sm:pr-9 sm:text-sm/6'
-                : 'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'}
-              bind:value={email}
-              onfocus={() => (emailErr = '')}
-              aria-invalid={emailErr ? 'true' : 'false'}
-              aria-describedby={emailErr ? 'email-error' : ''}
-            />
-            {#if emailErr}
-              <svg
-                class="pointer-events-none col-start-1 row-start-1 mr-3 size-5 self-center justify-self-end text-red-500 sm:size-4"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                aria-hidden="true"
-                data-slot="icon"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            {/if}
-          </div>
-          {#if emailErr}
-            <p in:fade class="mt-2 text-sm text-red-600" id="email-error">{emailErr}</p>
-          {/if}
+            {#snippet end()}
+              {#if emailErr}
+                <svg
+                  class="pointer-events-none col-start-1 row-start-1 mr-3 size-5 self-center justify-self-end text-red-500"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  data-slot="icon"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              {/if}
+            {/snippet}
+          </TextField>
         </div>
 
         <div class="pt-4">
-          <button
-            type="submit"
-            class="pointer flex w-full cursor-pointer justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            onclick={handleClick}>Ingresar</button
+          <Button
+            variant="filled"
+            class="w-full text-center!"
+            --np-filled-button-container-color="var(--color-indigo-600)"
+            --np-filled-button-container-height="42px"
+            --np-filled-button-container-shape="4px"
+            onclick={handleClick}
           >
+            Ingresar
+          </Button>
         </div>
       </div>
     </div>
