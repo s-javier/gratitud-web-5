@@ -3,20 +3,14 @@
 
   let { children } = $props()
   let showMenu = $state(false)
+  let showDropdown = $state(false)
 </script>
 
-<!--
-  This example requires updating your template:
-
-  ```
-  <html class="h-full bg-gray-50">
-  <body class="h-full">
-  ```
--->
-<div>
+<div class="min-h-screen">
   <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
   <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
-    <!--
+    {#if showMenu}
+      <!--
       Off-canvas menu backdrop, show/hide based on off-canvas menu state.
 
       Entering: "transition-opacity ease-linear duration-300"
@@ -26,15 +20,12 @@
         From: "opacity-100"
         To: "opacity-0"
     -->
-    {#if showMenu}
       <div
         class="fixed inset-0 bg-gray-900/80"
         aria-hidden="true"
         transition:fade={{ duration: 300, easing: (t) => t }}
       ></div>
-    {/if}
 
-    {#if showMenu}
       <div class="fixed inset-0 flex">
         <!--
         Off-canvas menu, show/hide based on off-canvas menu state.
@@ -243,48 +234,6 @@
                     </li>
                   </ul>
                 </li>
-                <li>
-                  <div class="text-xs/6 font-semibold text-gray-400">Your teams</div>
-                  <ul role="list" class="-mx-2 mt-2 space-y-1">
-                    <li>
-                      <!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->
-                      <a
-                        href="#"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                      >
-                        <span
-                          class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                          >H</span
-                        >
-                        <span class="truncate">Heroicons</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                      >
-                        <span
-                          class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                          >T</span
-                        >
-                        <span class="truncate">Tailwind Labs</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="#"
-                        class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                      >
-                        <span
-                          class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                          >W</span
-                        >
-                        <span class="truncate">Workcation</span>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
               </ul>
             </nav>
           </div>
@@ -454,67 +403,32 @@
               </li>
             </ul>
           </li>
-          <li>
-            <div class="text-xs/6 font-semibold text-gray-400">Your teams</div>
-            <ul role="list" class="-mx-2 mt-2 space-y-1">
-              <li>
-                <!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                >
-                  <span
-                    class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                    >H</span
-                  >
-                  <span class="truncate">Heroicons</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                >
-                  <span
-                    class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                    >T</span
-                  >
-                  <span class="truncate">Tailwind Labs</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                >
-                  <span
-                    class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                    >W</span
-                  >
-                  <span class="truncate">Workcation</span>
-                </a>
-              </li>
-            </ul>
-          </li>
           <li class="-mx-6 mt-auto">
-            <a
-              href="#"
-              class="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
+            <button
+              class="flex w-full cursor-pointer items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
+              onclick={() => (showDropdown = !showDropdown)}
             >
-              <img
+              <svg
                 class="size-8 rounded-full bg-gray-50"
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt=""
-              />
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <circle cx="16" cy="16" r="16" fill="#E5E7EB" />
+                <circle cx="16" cy="13" r="6" fill="#A3A3A3" />
+                <path d="M6 26c0-3.3137 4.4772-6 10-6s10 2.6863 10 6" fill="#A3A3A3" />
+              </svg>
               <span class="sr-only">Your profile</span>
-              <span aria-hidden="true">Tom Cook</span>
-            </a>
+              <span aria-hidden="true">Tom Cookkk</span>
+            </button>
           </li>
         </ul>
       </nav>
     </div>
   </div>
 
+  <!-- Toolbar -->
   <div
     class="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-xs sm:px-6 lg:hidden"
   >
@@ -540,19 +454,25 @@
         />
       </svg>
     </button>
-    <div class="flex-1 text-sm/6 font-semibold text-gray-900">Dashboard</div>
+    <div class="flex-1 text-sm/6 font-semibold text-gray-900">Gratitud</div>
     <a href="#">
       <span class="sr-only">Your profile</span>
-      <img
+      <svg
         class="size-8 rounded-full bg-gray-50"
-        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-        alt=""
-      />
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <circle cx="16" cy="16" r="16" fill="#E5E7EB" />
+        <circle cx="16" cy="13" r="6" fill="#A3A3A3" />
+        <path d="M6 26c0-3.3137 4.4772-6 10-6s10 2.6863 10 6" fill="#A3A3A3" />
+      </svg>
     </a>
   </div>
 
-  <main class="bg-zinc-100 py-3 lg:pl-72">
-    <div class="mx-3 bg-white px-4 py-7 sm:px-6 lg:px-8">
+  <main class="min-h-screen bg-zinc-100 py-3 lg:pl-72">
+    <div class="mx-3 rounded-lg bg-white px-4 py-7 pb-10 sm:px-6 lg:px-8">
       {@render children()}
     </div>
   </main>
