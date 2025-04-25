@@ -19,7 +19,7 @@
       return
     }
     // redirect(303, '/uno')
-    goto('/uno')
+    goto('/codigo')
   }
 </script>
 
