@@ -1,11 +1,9 @@
-export async function handle({ event, resolve }: any) {
-  // if (event.url.pathname === '/ping') {
-  //   return new Response('pong')
-  // }
-  // return await resolve(event, {
-  //   transformPageChunk: ({ html }) => html.replace('<body', '<body style="color: hotpink"'),
-  // })
-  console.log('hook')
-  console.log(event.url.pathname)
+import type { RequestEvent } from '@sveltejs/kit'
+import { NODE_ENV } from '$env/static/private'
+
+export async function handle({ event, resolve }: { event: RequestEvent; resolve: any }) {
+  if (NODE_ENV === 'development') {
+    console.log('->', event.route.id)
+  }
   return await resolve(event)
 }
