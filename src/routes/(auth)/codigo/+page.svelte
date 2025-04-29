@@ -117,6 +117,7 @@
         --np-filled-button-container-height="42px"
         --np-filled-button-container-shape="4px"
         onclick={handleClick}
+        disabled={timeLimit === 0}
       >
         Ingresar
       </Button>
