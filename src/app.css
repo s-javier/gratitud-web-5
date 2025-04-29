@@ -4,6 +4,10 @@
 @source "../node_modules/flowbite-svelte/dist";
 @source "../node_modules/flowbite-svelte-icons/dist";
 
+:root {
+  --o-text-primary-color: var(--color-pink-500);
+}
+
 .spinner_Uvk8 {
   animation: spinner_otJF 1.6s cubic-bezier(0.52, 0.6, 0.25, 0.99) infinite;
 }

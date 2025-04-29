@@ -4,6 +4,7 @@
   import { applyAction, enhance } from '$app/forms'
   // import type { PageProps } from './$types'
   import type { ActionResult } from '@sveltejs/kit'
+  import { loader } from '~/stores/loader.svelte'
 
   // let { form }: PageProps = $props()
   let emailErr = $state('')
@@ -31,8 +32,10 @@
       <form
         method="POST"
         use:enhance={() => {
+          loader.is = true
           return async ({ result }: { result: ActionResult }) => {
             await applyAction(result)
+            loader.is = false
             if ('data' in result && result.data?.error) {
               emailErr = result.data.error.email
             }

@@ -1,12 +1,26 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition'
+  import { onMount } from 'svelte'
+  // import { fade } from 'svelte/transition'
   import { goto } from '$app/navigation'
   import { Button } from 'noph-ui'
   import { OTPInput, OTPRoot } from '@jimmyverburgt/svelte-input-otp'
   import { MinusOutline } from 'flowbite-svelte-icons'
   import { loader } from '~/stores/loader.svelte'
+  import { Page } from '~/enums'
 
+  let timeLimit = $state(5) /* 5 mins */
   let value = $state('')
+
+  onMount(() => {
+    const interval = setInterval(() => {
+      if (timeLimit === 0) {
+        clearInterval(interval)
+      } else {
+        timeLimit -= 1
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  })
 
   function handleOtpComplete(code: string) {
     console.log('OTP Complete:', code)
@@ -44,6 +58,7 @@
           Si el email no lo ves en tu bandeja de entrada, por favor, revisa tu carpeta de spam.
         </p>
       </section>
+
       <div class="mb-10 flex justify-center">
         <OTPRoot
           maxLength={6}
@@ -79,6 +94,21 @@
           {/snippet}
         </OTPRoot>
       </div>
+
+      <section class="mb-10">
+        {#if timeLimit > 0}
+          <div class="text-center text-sm font-bold text-gray-400">
+            Tienes {timeLimit} segundos para ingresar el código.
+          </div>
+        {:else}
+          <div class="text-center text-sm font-bold text-red-500">
+            Oh no, se acabó el tiempo. El código expiró y no se puede volver a utilizar. Por favor,
+            presiona&nbsp;
+            <a href={Page.LOGIN} class="cursor-pointer text-gray-400 hover:underline"> aquí </a>
+            &nbsp;para que ingreses nuevamente tu email y recibirás un nuevo código.
+          </div>
+        {/if}
+      </section>
 
       <Button
         variant="filled"
