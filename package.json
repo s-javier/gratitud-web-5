@@ -41,9 +41,8 @@
     "drizzle-orm": "0.43.1",
     "es-toolkit": "1.36.0",
     "motion": "12.9.2",
-    "noph-ui": "0.16.17",
+    "noph-ui": "0.16.18",
     "pg": "8.15.6",
-    "rollbar": "2.26.4",
-    "xstate": "5.19.2"
+    "rollbar": "2.26.4"
   }
 }
