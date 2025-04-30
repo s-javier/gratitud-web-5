@@ -39,7 +39,7 @@ class Machine {
         .where(eq(personTable.email, this.email))
     } catch (e: any) {
       rollbar.error('En "/ingreso", error al consultar por email en db.', e)
-      this.error.server = 'Por favor, inténtalo de nuevo o más tarde.'
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
       throw new Error()
     }
     if (query.length === 0) {

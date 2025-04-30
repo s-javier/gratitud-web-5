@@ -4,6 +4,7 @@
   import { applyAction, enhance } from '$app/forms'
   // import type { PageProps } from './$types'
   import type { ActionResult } from '@sveltejs/kit'
+  import { toast } from 'svoast'
   import { loader } from '~/stores/loader.svelte'
 
   // let { form }: PageProps = $props()
@@ -36,8 +37,12 @@
           return async ({ result }: { result: ActionResult }) => {
             await applyAction(result)
             loader.is = false
-            if ('data' in result && result.data?.error) {
+            if ('data' in result && result.data?.error?.email) {
               emailErr = result.data.error.email
+              return
+            }
+            if ('data' in result && result.data?.error?.server) {
+              toast.error(result.data.error.server, { closable: true, infinite: true })
             }
           }
         }}

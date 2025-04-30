@@ -5,7 +5,14 @@
 @source "../node_modules/flowbite-svelte-icons/dist";
 
 :root {
+  --svoast-bg: #fff;
+  --svoast-text: var(--color-gray-800);
+
   --o-text-primary-color: var(--color-pink-500);
+}
+
+.svoast-dismiss {
+  cursor: pointer;
 }
 
 .spinner_Uvk8 {
