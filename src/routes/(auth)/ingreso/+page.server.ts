@@ -10,14 +10,12 @@ import { add } from 'date-fns'
 import { createTransport } from 'nodemailer'
 import { General } from '~/enums'
 
-type Error = {
-  server?: string
-  email?: string
-}
-
 class Machine {
   email: string
-  error: Error = {}
+  error: {
+    server?: string
+    email?: string
+  } = {}
   user: any
   code: string = ''
 
