@@ -33,6 +33,7 @@
       <form
         method="POST"
         use:enhance={() => {
+          toast.removeAll()
           loader.is = true
           return async ({ result }: { result: ActionResult }) => {
             await applyAction(result)

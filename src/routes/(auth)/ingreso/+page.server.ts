@@ -1,6 +1,7 @@
 import { type RequestEvent, redirect } from '@sveltejs/kit'
+import * as v from 'valibot'
 import { eq } from 'drizzle-orm'
-import { NODE_ENV, SESSION_DAYS } from '$env/static/private'
+import { SESSION_DAYS, SMTP_HOST, SMTP_USER, SMTP_PASS } from '$env/static/private'
 import db from '~/lib/server/db'
 import { personTable, sessionTable } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
@@ -8,7 +9,7 @@ import { customAlphabet } from 'nanoid'
 import { add } from 'date-fns'
 // @ts-ignore
 import { createTransport } from 'nodemailer'
-import { General } from '~/enums'
+import { General, Page } from '~/enums'
 
 class Machine {
   email: string
@@ -28,8 +29,17 @@ class Machine {
   }
 
   validateForm() {
-    if (!this.email) {
-      this.error.email = 'El correo electrónico no puede estar vacío.'
+    const emailErr = v.safeParse(
+      v.pipe(
+        v.string('El valor de este campo es inválido.'),
+        v.trim(),
+        v.nonEmpty('Este campo es requerido.'),
+        v.email('El valor de este campo es inválido.'),
+      ),
+      this.email,
+    )
+    if (emailErr.issues) {
+      this.error.email = emailErr.issues[0].message
       throw new Error()
     }
   }
@@ -51,19 +61,21 @@ class Machine {
       throw new Error()
     }
     if (query.length === 0) {
-      if (NODE_ENV === 'development') {
-        console.error('No existe el usuario en la db.')
-      }
-      return
+      // if (NODE_ENV === 'development') {
+      //   console.error('No existe el usuario en la db.')
+      // }
+      this.error.server = 'Has ingresado un email que no tenemos registrado.'
+      throw new Error()
     }
     this.user = query[0]
   }
 
-  getUserIsActtive() {
+  validateUserIsActtive() {
     if (this.user.isActive === false) {
-      if (NODE_ENV === 'development') {
-        console.error('Usuario no activo.')
-      }
+      // if (NODE_ENV === 'development') {
+      //   console.error('Usuario no activo.')
+      // }
+      this.error.server = 'Eres un usuario inactivo: no puedes ingresar.'
       throw new Error()
     }
   }
@@ -90,12 +102,12 @@ class Machine {
 
   async sendEmail() {
     const transporter = createTransport({
-      host: process.env.SMTP_HOST,
+      host: SMTP_HOST,
       port: 587,
       secure: false,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: SMTP_USER,
+        pass: SMTP_PASS,
       },
       tls: { rejectUnauthorized: false },
       debug: true,
@@ -134,7 +146,7 @@ export const actions = {
     try {
       machine.validateForm()
       await machine.getUser()
-      machine.getUserIsActtive()
+      machine.validateUserIsActtive()
       await machine.createSession()
       await machine.sendEmail()
     } catch {}
@@ -143,6 +155,6 @@ export const actions = {
       return { error: machine.error }
     }
     event.cookies.set('login', 'true', { path: '/' })
-    redirect(303, '/codigo')
+    redirect(303, Page.CODE)
   },
 }
