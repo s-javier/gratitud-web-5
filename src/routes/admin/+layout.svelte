@@ -6,12 +6,13 @@
   import { ArrowRightStartOnRectangle } from 'svelte-heros-v2'
   import { loader } from '~/stores/loader.svelte'
 
-  let { children } = $props()
+  let { data, children } = $props()
   let showMenu = $state(false)
   let showDropdown = $state(false)
 
   onMount(() => {
     loader.is = false
+    console.log(data)
   })
 </script>
 

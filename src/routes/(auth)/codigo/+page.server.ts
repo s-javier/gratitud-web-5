@@ -9,6 +9,9 @@ import rollbar from '~/lib/server/rollbar'
 import { MAX_ACTIVE_SESSIONS } from '$env/static/private'
 
 export function load(event: RequestEvent) {
+  if (event.cookies.get('token')) {
+    redirect(303, Page.ADMIN_WELCOME)
+  }
   if (event.cookies.get('login') === undefined || event.cookies.get('login') !== 'true') {
     redirect(303, Page.LOGIN)
   }

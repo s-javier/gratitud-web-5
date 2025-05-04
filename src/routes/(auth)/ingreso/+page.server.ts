@@ -11,6 +11,12 @@ import { add } from 'date-fns'
 import { createTransport } from 'nodemailer'
 import { General, Page } from '~/enums'
 
+export function load(event: RequestEvent) {
+  if (event.cookies.get('token')) {
+    redirect(303, Page.ADMIN_WELCOME)
+  }
+}
+
 class Machine {
   email: string
   error: {
