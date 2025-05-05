@@ -1,11 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { fade, fly } from 'svelte/transition'
+  import { page } from '$app/state'
   import { Dropdown, DropdownItem } from 'flowbite-svelte'
   import { BuildingOutline, ChevronDownOutline, ChevronUpOutline } from 'flowbite-svelte-icons'
   import { ArrowRightStartOnRectangle } from 'svelte-heros-v2'
   import { loader } from '~/stores/loader.svelte'
   import { toast } from 'svoast'
+  import { applyAction, enhance } from '$app/forms'
+  import type { ActionResult } from '@sveltejs/kit'
   import Icon from './Icon.svelte'
 
   let { data, children }: any = $props()
@@ -101,59 +104,60 @@
             </div>
             <nav class="flex flex-1 flex-col">
               <ul role="list" class="flex flex-1 flex-col gap-y-7">
-                <li class="-mx-6">
-                  <button
-                    class="flex w-full cursor-pointer items-center justify-between px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
-                    onclick={() => (showDropdown = !showDropdown)}
-                  >
-                    <div class="flex items-center gap-x-4">
-                      <BuildingOutline class="size-6 text-gray-400" />
-                      <span aria-hidden="true">
-                        {data.organizationsToChange.find((element: any) => element.isSelected)
-                          .title}
-                      </span>
-                    </div>
-                    <ChevronDownOutline />
-                  </button>
-                  <Dropdown simple class="-mt-1">
-                    {#each data.organizationsToChange.filter((element: any) => element.isSelected === false) as organization}
-                      <DropdownItem class="flex cursor-pointer items-center gap-x-4">
-                        {organization.title}
-                      </DropdownItem>
-                    {/each}
-                  </Dropdown>
-                </li>
+                {#if data.organizationsToChange.length > 1}
+                  <li class="-mx-6">
+                    <button
+                      class="flex w-full cursor-pointer items-center justify-between px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
+                      onclick={() => (showDropdown = !showDropdown)}
+                    >
+                      <div class="flex items-center gap-x-4">
+                        <BuildingOutline class="size-6 text-gray-400" />
+                        <span aria-hidden="true">
+                          {data.organizationsToChange.find((element: any) => element.isSelected)
+                            .title}
+                        </span>
+                      </div>
+                      <ChevronDownOutline />
+                    </button>
+                    <Dropdown simple class="-mt-1">
+                      {#each data.organizationsToChange.filter((element: any) => element.isSelected === false) as organization}
+                        <DropdownItem class="flex cursor-pointer items-center gap-x-4">
+                          <form
+                            method="POST"
+                            action="/admin/organizaciones?/change"
+                            use:enhance={() => {
+                              toast.removeAll()
+                              loader.is = true
+                              return async ({ result }: { result: ActionResult }) => {
+                                await applyAction(result)
+                                loader.is = false
+                                if ('data' in result && result.data?.error?.server) {
+                                  toast.error(result.data.error.server, {
+                                    closable: true,
+                                    infinite: true,
+                                  })
+                                }
+                              }
+                            }}
+                          >
+                            <input type="hidden" name="organizationId" value={organization.id} />
+                            <button class="cursor-pointer">{organization.title}</button>
+                          </form>
+                        </DropdownItem>
+                      {/each}
+                    </Dropdown>
+                  </li>
+                {/if}
                 <li>
                   <ul role="list" class="-mx-2 space-y-1">
-                    <!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->
-                    <!-- <li>
-                      <a
-                        href="#"
-                        class="group flex gap-x-3 rounded-md bg-gray-50 p-2 text-sm/6 font-semibold text-indigo-600"
-                      >
-                        <svg
-                          class="size-6 shrink-0 text-indigo-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke-width="1.5"
-                          stroke="currentColor"
-                          aria-hidden="true"
-                          data-slot="icon"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                          />
-                        </svg>
-                        Dashboard
-                      </a>
-                    </li> -->
                     {#each data.menu as menu}
                       <li>
                         <a
                           href={menu.path}
-                          class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                          class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold {page.url
+                            .pathname === menu.path
+                            ? 'bg-gray-50 text-indigo-600'
+                            : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'}"
                         >
                           <Icon title={menu.title} />
                           {menu.title}
@@ -183,58 +187,59 @@
       </div>
       <nav class="flex flex-1 flex-col">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
-          <li class="-mx-6">
-            <button
-              class="flex w-full cursor-pointer items-center justify-between px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
-              onclick={() => (showDropdown = !showDropdown)}
-            >
-              <div class="flex items-center gap-x-4">
-                <BuildingOutline class="size-6 text-gray-400" />
-                <span aria-hidden="true">
-                  {data.organizationsToChange.find((element: any) => element.isSelected).title}
-                </span>
-              </div>
-              <ChevronDownOutline />
-            </button>
-            <Dropdown simple class="-mt-1">
-              {#each data.organizationsToChange.filter((element: any) => element.isSelected === false) as organization}
-                <DropdownItem class="flex cursor-pointer items-center gap-x-4">
-                  {organization.title}
-                </DropdownItem>
-              {/each}
-            </Dropdown>
-          </li>
+          {#if data.organizationsToChange.length > 1}
+            <li class="-mx-6">
+              <button
+                class="flex w-full cursor-pointer items-center justify-between px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
+                onclick={() => (showDropdown = !showDropdown)}
+              >
+                <div class="flex items-center gap-x-4">
+                  <BuildingOutline class="size-6 text-gray-400" />
+                  <span aria-hidden="true">
+                    {data.organizationsToChange.find((element: any) => element.isSelected).title}
+                  </span>
+                </div>
+                <ChevronDownOutline />
+              </button>
+              <Dropdown simple class="-mt-1">
+                {#each data.organizationsToChange.filter((element: any) => element.isSelected === false) as organization}
+                  <DropdownItem class="flex cursor-pointer items-center gap-x-4">
+                    <form
+                      method="POST"
+                      action="/admin/organizaciones?/change"
+                      use:enhance={() => {
+                        toast.removeAll()
+                        loader.is = true
+                        return async ({ result }: { result: ActionResult }) => {
+                          await applyAction(result)
+                          loader.is = false
+                          if ('data' in result && result.data?.error?.server) {
+                            toast.error(result.data.error.server, {
+                              closable: true,
+                              infinite: true,
+                            })
+                          }
+                        }
+                      }}
+                    >
+                      <input type="hidden" name="organizationId" value={organization.id} />
+                      <button class="cursor-pointer">{organization.title}</button>
+                    </form>
+                  </DropdownItem>
+                {/each}
+              </Dropdown>
+            </li>
+          {/if}
           <li>
             <ul role="list" class="-mx-2 space-y-1">
-              <!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->
-              <!-- <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md bg-gray-50 p-2 text-sm/6 font-semibold text-indigo-600"
-                >
-                  <svg
-                    class="size-6 shrink-0 text-indigo-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                    data-slot="icon"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                    />
-                  </svg>
-                  Welcome
-                </a>
-              </li> -->
               {#each data.menu as menu}
                 <li>
                   <a
                     href={menu.path}
-                    class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                    class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold {page.url
+                      .pathname === menu.path
+                      ? 'bg-gray-50 text-indigo-600'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'}"
                   >
                     <Icon title={menu.title} />
                     {menu.title}
