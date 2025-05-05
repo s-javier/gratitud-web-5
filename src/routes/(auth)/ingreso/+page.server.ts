@@ -1,15 +1,16 @@
 import { type RequestEvent, redirect } from '@sveltejs/kit'
 import * as v from 'valibot'
 import { eq } from 'drizzle-orm'
-import { SESSION_DAYS, SMTP_HOST, SMTP_USER, SMTP_PASS } from '$env/static/private'
+import { SESSION_DAYS, RESEND_API_KEY, NODE_ENV } from '$env/static/private'
 import db from '~/lib/server/db'
 import { personTable, sessionTable } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
 import { customAlphabet } from 'nanoid'
 import { add } from 'date-fns'
 // @ts-ignore
-import { createTransport } from 'nodemailer'
+// import { createTransport } from 'nodemailer'
 import { General, Page } from '~/enums'
+import { Resend } from 'resend'
 
 export function load(event: RequestEvent) {
   if (event.cookies.get('token')) {
@@ -107,37 +108,63 @@ class Machine {
   }
 
   async sendEmail() {
-    const transporter = createTransport({
-      host: SMTP_HOST,
-      port: 587,
-      secure: false,
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS,
-      },
-      tls: { rejectUnauthorized: false },
-      debug: true,
-    })
-    try {
-      await transporter.sendMail({
-        from: `"${General.TITLE}" <noresponder@condimento.cl>`,
-        to: this.email,
-        subject: 'Ingreso',
-        html: `
-          <div style="background-color:rgb(207,208,209);padding-top:30px;padding-bottom:30px">
-            <div style="padding:30px;font-size:14px;font-family:Lato,Helvetica,Arial,sans-serif;color:rgb(55,65,81);line-height:1.5em;width:98%;max-width:500px;border-radius:16px;margin:10px auto 0;background-color:white">
-              <p style="margin-bottom: 16px">Hola, ${this.user.firstName}:</p>
-              <p style="margin-bottom: 16px">Bienvenido/a a ${General.TITLE}. Por favor, utiliza este código para ingresar:</p>
-              <p style="margin-bottom: 30px; text-align: center;">${this.code}</p>
-              <p>Que tengas un buen día.</p>
-            </div>
+    // const transporter = createTransport({
+    //   host: SMTP_HOST,
+    //   port: 587,
+    //   secure: false,
+    //   auth: {
+    //     user: SMTP_USER,
+    //     pass: SMTP_PASS,
+    //   },
+    //   tls: { rejectUnauthorized: false },
+    //   debug: true,
+    // })
+    // try {
+    //   await transporter.sendMail({
+    //     from: `"${General.TITLE}" <noresponder@condimento.cl>`,
+    //     to: this.email,
+    //     subject: 'Ingreso',
+    //     html: `
+    //       <div style="background-color:rgb(207,208,209);padding-top:30px;padding-bottom:30px">
+    //         <div style="padding:30px;font-size:14px;font-family:Lato,Helvetica,Arial,sans-serif;color:rgb(55,65,81);line-height:1.5em;width:98%;max-width:500px;border-radius:16px;margin:10px auto 0;background-color:white">
+    //           <p style="margin-bottom: 16px">Hola, ${this.user.firstName}:</p>
+    //           <p style="margin-bottom: 16px">Bienvenido/a a ${General.TITLE}. Por favor, utiliza este código para ingresar:</p>
+    //           <p style="margin-bottom: 30px; text-align: center;">${this.code}</p>
+    //           <p>Que tengas un buen día.</p>
+    //         </div>
+    //       </div>
+    //     `,
+    //   })
+    // } catch (e: any) {
+    //   rollbar.error('Error de envío de email. Ruta "/ingreso".', e)
+    //   this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    //   throw new Error()
+    // }
+    const resend = new Resend(RESEND_API_KEY)
+    const { data, error } = await resend.emails.send({
+      from: `"${General.TITLE}" <noresponder@condimento.cl>`,
+      to: [this.email],
+      subject: 'Ingreso',
+      html: `
+        <div style="background-color:rgb(207,208,209);padding-top:30px;padding-bottom:30px">
+          <div style="padding:30px;font-size:14px;font-family:Lato,Helvetica,Arial,sans-serif;color:rgb(55,65,81);line-height:1.5em;width:98%;max-width:500px;border-radius:16px;margin:10px auto 0;background-color:white">
+            <p style="margin-bottom: 16px">Hola, ${this.user.firstName}:</p>
+            <p style="margin-bottom: 16px">Bienvenido/a a ${General.TITLE}. Por favor, utiliza este código para ingresar:</p>
+            <p style="margin-bottom: 30px; text-align: center;">${this.code}</p>
+            <p>Que tengas un buen día.</p>
           </div>
-        `,
-      })
-    } catch (e: any) {
-      rollbar.error('Error de envío de email. Ruta "/ingreso".', e)
+        </div>
+      `,
+    })
+
+    if (error) {
+      rollbar.error('Error de envío de email. Ruta "/ingreso".', error)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
       throw new Error()
+    }
+
+    if (NODE_ENV === 'development') {
+      console.log('Data de email enviado:', data)
     }
   }
 }

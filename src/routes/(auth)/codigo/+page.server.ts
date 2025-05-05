@@ -6,7 +6,7 @@ import { Page } from '~/enums'
 import db from '~/lib/server/db'
 import { sessionTable } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
-import { MAX_ACTIVE_SESSIONS } from '$env/static/private'
+import { MAX_ACTIVE_SESSIONS, NODE_ENV } from '$env/static/private'
 
 export function load(event: RequestEvent) {
   if (event.cookies.get('token')) {
@@ -45,7 +45,7 @@ class Machine {
         v.string('El valor del código es inválido.'),
         v.trim(),
         v.nonEmpty('Digitar el código es obligatorio.'),
-        v.regex(/^[0-9]{6}$/, 'El valor del código es inválido.'),
+        v.regex(/^\d{6}$/, 'El valor del código es inválido.'),
       ),
       this.code,
     )
@@ -150,7 +150,9 @@ class Machine {
 export const actions = {
   default: async (event: RequestEvent) => {
     const data = await event.request.formData()
-    console.log(data)
+    if (NODE_ENV === 'development') {
+      console.log(data)
+    }
     const auxTimeLimit = data.get('timeLimit')
     const timeLimit: string = typeof auxTimeLimit === 'string' ? auxTimeLimit : '0'
     const auxCode = data.get('otp')

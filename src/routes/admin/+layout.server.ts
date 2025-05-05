@@ -6,12 +6,14 @@ import db from '~/lib/server/db'
 import {
   menupageTable,
   organizationPersonRoleTable,
+  organizationTable,
   permissionTable,
   rolePermissionTable,
   roleTable,
   sessionTable,
 } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
+import { NODE_ENV } from '$env/static/private'
 
 class Machine {
   sessionId: string = ''
@@ -42,13 +44,14 @@ class Machine {
   }
   permissions: string[] = []
   menu: any[] = []
+  organizationsToChange: any[] = []
 
   constructor(sessionId: string) {
     this.sessionId = sessionId
   }
 
   getIsErrorToRedirectLogin() {
-    return this.errorToRedirectLogin
+    return Object.keys(this.errorToRedirectLogin).length > 0
   }
 
   getIsError() {
@@ -56,12 +59,12 @@ class Machine {
   }
 
   getIsErrorToRedirectWelcome() {
-    return this.errorToRedirectWelcome
+    return Object.keys(this.errorToRedirectWelcome).length > 0
   }
 
   validateSessionId() {
     if (!this.sessionId) {
-      this.errorToRedirectLogin.server = 'No se encontró la sesión.'
+      this.errorToRedirectLogin.server = 'No está la cookie de token.'
       throw new Error()
     }
   }
@@ -192,6 +195,33 @@ class Machine {
     }
     this.menu = query
   }
+
+  async getOrganizationsToChange() {
+    let query: any[] = []
+    try {
+      query = await db
+        .select({
+          id: organizationTable.id,
+          title: organizationTable.title,
+          isSelected: organizationPersonRoleTable.isSelected,
+        })
+        .from(organizationTable)
+        .innerJoin(
+          organizationPersonRoleTable,
+          eq(organizationTable.id, organizationPersonRoleTable.organizationId),
+        )
+        .where(eq(organizationPersonRoleTable.personId, this.session.personId))
+    } catch (e: any) {
+      rollbar.error('Error en DB. Layout Admin. Obtención de organizaciones para cambiar.', e)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+      throw new Error()
+    }
+    if (query.length === 0) {
+      this.error.server = 'El usuario no está asociado a ninguan organización.'
+      throw new Error()
+    }
+    this.organizationsToChange = query
+  }
 }
 
 export async function load(event: RequestEvent) {
@@ -207,10 +237,13 @@ export async function load(event: RequestEvent) {
     await machine.getPermissions(event.url.pathname)
     machine.validatePermission(event.url.pathname)
     await machine.getMenu()
+    await machine.getOrganizationsToChange()
   } catch {}
 
   if (machine.getIsErrorToRedirectLogin()) {
-    console.log(machine.errorToRedirectLogin)
+    if (NODE_ENV === 'development') {
+      console.error(machine.errorToRedirectLogin)
+    }
     event.cookies.delete('token', { path: '/' })
     redirect(303, Page.LOGIN)
   }
@@ -225,5 +258,6 @@ export async function load(event: RequestEvent) {
 
   return {
     menu: machine.menu,
+    organizationsToChange: machine.organizationsToChange,
   }
 }

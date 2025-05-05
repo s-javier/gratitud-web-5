@@ -47,6 +47,7 @@
     "nodemailer": "7.0.0",
     "noph-ui": "0.16.18",
     "pg": "8.15.6",
+    "resend": "4.5.0",
     "rollbar": "2.26.4",
     "valibot": "1.0.0"
   }
