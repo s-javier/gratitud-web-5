@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { BuildingOffice2, Heart, Identification, LockOpen, Users, Window } from 'svelte-heros-v2'
+  import {
+    BuildingOffice2,
+    Clock,
+    Gift,
+    Heart,
+    Identification,
+    LockOpen,
+    Users,
+    Window,
+  } from 'svelte-heros-v2'
 
   let { title } = $props()
 </script>
@@ -16,4 +25,8 @@
   <Window class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
 {:else if title === 'Mis agradecimientos'}
   <Heart class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+{:else if title === 'Recordar'}
+  <Clock class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+{:else if title === 'Pide y se te dará'}
+  <Gift class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
 {/if}
