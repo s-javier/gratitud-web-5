@@ -3,6 +3,7 @@ import { Page } from '~/enums'
 import Auth from '~/lib/server/Auth'
 
 export async function load(event: RequestEvent) {
+  console.log('Hi')
   const sessionId = event.cookies.get('token')
   const auth = new Auth(sessionId ?? '')
   await auth.validateAuthAndGetMenuAndOrganizationsToChange(event.url.pathname)
