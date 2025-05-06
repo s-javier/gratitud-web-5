@@ -1,20 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { fade, fly } from 'svelte/transition'
-  import { page } from '$app/state'
-  import { Dropdown, DropdownItem } from 'flowbite-svelte'
-  import { BuildingOutline, ChevronDownOutline, ChevronUpOutline } from 'flowbite-svelte-icons'
-  import { ArrowRightStartOnRectangle } from 'svelte-heros-v2'
   import { loader } from '~/stores/loader.svelte'
   import { toast } from 'svoast'
-  import { applyAction, enhance } from '$app/forms'
-  import type { ActionResult } from '@sveltejs/kit'
-  import Icon from './Icon.svelte'
   import SidebarContent from './SidebarContent.svelte'
 
   let { data, children }: any = $props()
   let showMenu = $state(false)
-  let showDropdown = $state(false)
 
   onMount(() => {
     loader.is = false
@@ -99,7 +91,7 @@
 
           <!-- Sidebar component, swap this element with another sidebar if you like -->
           <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2">
-            <SidebarContent />
+            <SidebarContent organizationsToChange={data.organizationsToChange} menu={data.menu} />
           </div>
         </div>
       </div>
@@ -110,7 +102,7 @@
   <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
-      <SidebarContent />
+      <SidebarContent organizationsToChange={data.organizationsToChange} menu={data.menu} />
     </div>
   </div>
 
