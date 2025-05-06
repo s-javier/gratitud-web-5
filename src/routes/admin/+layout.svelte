@@ -17,6 +17,9 @@
 
   onMount(() => {
     loader.is = false
+  })
+
+  $effect(() => {
     console.log(data)
     if ('error' in data && data.error?.server) {
       toast.error(data.error.server, { closable: true, infinite: true })
