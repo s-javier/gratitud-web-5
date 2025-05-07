@@ -10,7 +10,7 @@
   import Icon from './Icon.svelte'
   import { fade, scale } from 'svelte/transition'
 
-  let { organizationsToChange, menu } = $props()
+  let { organizationsToChange, menu, userFirstName } = $props()
   let isOpenOrganizations = $state(false)
   let organizationsRef: HTMLElement | null = $state(null)
   let isOpenUser = $state(false)
@@ -207,7 +207,7 @@
               <circle cx="16" cy="13" r="6" fill="#A3A3A3" />
               <path d="M6 26c0-3.3137 4.4772-6 10-6s10 2.6863 10 6" fill="#A3A3A3" />
             </svg>
-            <span aria-hidden="true">Tom Cookkk</span>
+            <span aria-hidden="true">{userFirstName}</span>
           </div>
           <ChevronUpOutline />
         </button>

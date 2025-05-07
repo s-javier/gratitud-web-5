@@ -17,7 +17,7 @@ export const actions = {
   default: async (event: RequestEvent) => {
     const data = await event.request.formData()
     if (NODE_ENV === 'development') {
-      console.log(data)
+      console.info('Formulario de código:', data)
     }
     const auxTimeLimit = data.get('timeLimit')
     const timeLimit: string = typeof auxTimeLimit === 'string' ? auxTimeLimit : '0'

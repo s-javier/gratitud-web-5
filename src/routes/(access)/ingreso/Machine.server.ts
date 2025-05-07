@@ -157,7 +157,7 @@ export default class Machine {
     }
 
     if (NODE_ENV === 'development') {
-      console.log('Data de email enviado:', data)
+      console.info('Data de email enviado:', data)
     }
   }
 }

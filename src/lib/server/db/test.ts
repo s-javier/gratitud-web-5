@@ -4,7 +4,7 @@ import { gratitudeTable } from './schema'
 
 async function test() {
   const gratitudes = await db.select().from(gratitudeTable)
-  console.log(gratitudes)
+  console.info(gratitudes)
 }
 
 test()

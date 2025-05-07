@@ -8,6 +8,7 @@ import {
   organizationPersonRoleTable,
   organizationTable,
   permissionTable,
+  personTable,
   rolePermissionTable,
   roleTable,
   sessionTable,
@@ -28,10 +29,12 @@ export default class Machine {
   session: {
     isActive: boolean
     personId: string
+    personFirstName: string
     expiresAt: Date | null
   } = {
     isActive: false,
     personId: '',
+    personFirstName: '',
     expiresAt: null,
   }
   userOrgRole: {
@@ -78,9 +81,11 @@ export default class Machine {
         .select({
           isActive: sessionTable.isActive,
           personId: sessionTable.personId,
+          personFirstName: personTable.firstName,
           expiresAt: sessionTable.expiresAt,
         })
         .from(sessionTable)
+        .innerJoin(personTable, eq(sessionTable.personId, personTable.id))
         .where(eq(sessionTable.id, this.sessionId))
     } catch (e: any) {
       rollbar.error('Error en DB. Layout Admin. Obtención de sesión.', e)

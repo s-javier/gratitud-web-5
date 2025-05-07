@@ -6,7 +6,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
     return new Response(null, { status: 204 })
   }
   if (NODE_ENV === 'development') {
-    console.log('->', event.route.id, event.url.pathname)
+    console.info('->', event.route.id, event.url.pathname)
   }
   return await resolve(event)
 }

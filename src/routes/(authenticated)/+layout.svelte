@@ -1,19 +1,13 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { fade, fly } from 'svelte/transition'
-  import { loader } from '~/stores/loader.svelte'
   import { toast } from 'svoast'
   import SidebarContent from './SidebarContent.svelte'
 
   let { data, children }: any = $props()
   let showMenu = $state(false)
 
-  onMount(() => {
-    loader.is = false
-  })
-
   $effect(() => {
-    console.log(data)
+    console.info('Layout authenticated. Datos:', data)
     if ('error' in data && data.error?.server) {
       toast.error(data.error.server, { closable: true, infinite: true })
     }
@@ -91,7 +85,11 @@
 
           <!-- Sidebar component, swap this element with another sidebar if you like -->
           <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2">
-            <SidebarContent organizationsToChange={data.organizationsToChange} menu={data.menu} />
+            <SidebarContent
+              organizationsToChange={data.organizationsToChange}
+              menu={data.menu}
+              userFirstName={data.userFirstName}
+            />
           </div>
         </div>
       </div>
@@ -102,7 +100,11 @@
   <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
-      <SidebarContent organizationsToChange={data.organizationsToChange} menu={data.menu} />
+      <SidebarContent
+        organizationsToChange={data.organizationsToChange}
+        menu={data.menu}
+        userFirstName={data.userFirstName}
+      />
     </div>
   </div>
 
