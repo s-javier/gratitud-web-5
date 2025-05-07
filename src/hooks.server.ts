@@ -9,7 +9,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
   }
 
   if (NODE_ENV === 'development') {
-    console.info('->', event.route.id, event.url.pathname)
+    console.info('->', event.request.method, event.route.id, event.url.pathname)
   }
 
   if (event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/gratitud')) {

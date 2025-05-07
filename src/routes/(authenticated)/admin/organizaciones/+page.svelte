@@ -16,11 +16,23 @@
       id: 'id',
       header: 'ID',
       // footer: 'ID',
-      // width: 50,
+      width: 300,
     },
     {
       id: 'title',
-      header: 'Organización',
+      header: [
+        'Organización',
+        {
+          filter: {
+            type: 'text',
+            config: {
+              icon: 'wxi-search', // Optional icon for the filter input
+              clear: true, // Allow clearing the input
+            },
+          },
+        },
+      ],
+      sort: true,
     },
     {
       id: 'isActive',
