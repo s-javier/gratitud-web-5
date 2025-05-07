@@ -159,7 +159,7 @@
                 </a> -->
               <form
                 method="POST"
-                action="/admin/organizaciones?/change"
+                action="/logout"
                 use:enhance={() => {
                   toast.removeAll()
                   loader.is = true

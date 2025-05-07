@@ -1,12 +1,29 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import { and, eq, ne } from 'drizzle-orm'
 import { Page } from '~/enums'
-import Auth from '~/lib/server/Auth'
 import db from '~/lib/server/db'
-import { organizationPersonRoleTable } from '~/lib/server/db/schema'
+import { organizationPersonRoleTable, organizationTable } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
 
-// export async function load() {}
+export async function load(event: RequestEvent) {
+  try {
+    const organizations = await db
+      .select({
+        id: organizationTable.id,
+        title: organizationTable.title,
+        isActive: organizationTable.isActive,
+      })
+      .from(organizationTable)
+    return {
+      organizations,
+    }
+  } catch (e: any) {
+    rollbar.error('Error en DB. Obtener todas las organizaciones.', e)
+    return {
+      error: 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.',
+    }
+  }
+}
 
 class Machine {
   personId: string
@@ -95,30 +112,11 @@ class Machine {
 
 export const actions = {
   change: async (event: RequestEvent) => {
-    const sessionId = event.cookies.get('token')
-    const auth = new Auth(sessionId ?? '')
-    // await auth.validateAuth(event.url.pathname)
-    await auth.validateAuth(Page.ADMIN_WELCOME)
-    if (auth.getIsErrorToRedirectLogin()) {
-      event.cookies.delete('token', { path: '/' })
-      redirect(303, Page.LOGIN)
-    }
-    if (auth.getIsError()) {
-      return { error: auth.error }
-    }
-    if (auth.getIsErrorToRedirectWelcome()) {
-      redirect(303, Page.ADMIN_WELCOME)
-    }
-
     const data = await event.request.formData()
     const auxOrganizationId = data.get('organizationId')
     const organizationId: string = typeof auxOrganizationId === 'string' ? auxOrganizationId : ''
 
-    const machine = new Machine(
-      auth.session.personId,
-      auth.userOrgRole.organizationId,
-      organizationId,
-    )
+    const machine = new Machine(event.locals.userId, event.locals.organizationId, organizationId)
 
     try {
       machine.validateOrganizationId()
