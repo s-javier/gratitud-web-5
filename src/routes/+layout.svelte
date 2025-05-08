@@ -3,6 +3,8 @@
   import '../app.css'
   import { beforeNavigate, afterNavigate } from '$app/navigation'
   import { Toasts } from 'svoast'
+  // @ts-ignore
+  import { Willow } from 'wx-svelte-core'
   import { loader } from '~/stores/loader.svelte'
   import LoaderOverlay from '~/components/LoaderOverlay.svelte'
 
@@ -18,6 +20,8 @@
 </script>
 
 <!-- <div class="text-right">{loader.is ? 'Cargando' : '~ cargando'}</div> -->
-{@render children()}
+<Willow>
+  {@render children()}
+</Willow>
 <LoaderOverlay />
 <Toasts position="top-right" />

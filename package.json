@@ -50,6 +50,8 @@
     "resend": "4.5.1",
     "rollbar": "2.26.4",
     "valibot": "1.1.0",
-    "wx-svelte-grid": "2.1.5"
+    "wx-svelte-core": "2.1.1",
+    "wx-svelte-grid": "2.1.5",
+    "wx-svelte-menu": "2.1.1"
   }
 }

@@ -1,4 +1,11 @@
 @import 'tailwindcss';
+
+@layer utilities {
+  .force-text-inherit * {
+    color: inherit !important;
+  }
+}
+
 /* @plugin "daisyui"; */
 @plugin 'flowbite/plugin';
 @source "../node_modules/flowbite-svelte/dist";
@@ -19,6 +26,12 @@
   background-color: var(--color-gray-200);
 }
 
+/* ▼ Spinner */
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+}
 .spinner_Uvk8 {
   animation: spinner_otJF 1.6s cubic-bezier(0.52, 0.6, 0.25, 0.99) infinite;
 }
@@ -39,3 +52,4 @@
     opacity: 0;
   }
 }
+/* ▲ Spinner */
