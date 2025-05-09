@@ -1,13 +1,18 @@
 <script lang="ts">
+  import { fade } from 'svelte/transition'
   import { toast } from 'svoast'
   // @ts-ignore
   import { Grid, Material } from 'wx-svelte-grid'
   // @ts-ignore
   import { ActionMenu } from 'wx-svelte-menu'
+  import { Button, Input } from 'flowbite-svelte'
+  import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import EditButton from './EditButton.svelte'
+  import StatusCell from './StatusCell.svelte'
 
   let { data }: any = $props()
   let table: any = $state()
+  let search = $state('')
 
   $effect(() => {
     if ('error' in data && data.error?.server) {
@@ -47,18 +52,80 @@
     {
       id: 'isActive',
       // header: ['Activa?', { css: 'flex justify-center' }],
-      header: 'Activa',
+      header: [
+        'Estatus',
+        {
+          filter: {
+            type: 'richselect',
+            config: {
+              // template: (option: any) => {
+              //   return option.label ? 'Activa' : 'Inactiva'
+              // },
+              options: [
+                { id: 'active', label: 'Activa' },
+                { id: 'inactive', label: 'Inactiva' },
+              ],
+              handler: (value: boolean, filter: string) => {
+                if (!filter) {
+                  return true
+                }
+                return (
+                  (value === true && filter === 'active') ||
+                  (value === false && filter === 'inactive')
+                )
+              },
+            },
+          },
+        },
+      ],
       width: 100,
       sort: true,
-      template: (isActive: boolean) => (isActive ? 'Sí' : 'No'),
+      cell: StatusCell,
+      // text: 'Activa|Inactiva',
+      // template: (isActive: boolean) => (isActive ? 'Sí' : 'No'),
     },
   ]
 
+  const filterAllTable = () => {
+    const value = search.toLowerCase()
+    table.exec('filter-rows', {
+      filter: (row: any) => {
+        // console.log('-> Fila')
+        const keys = Object.keys(row)
+        let rowResult = false
+        for (let key of keys) {
+          // console.log(
+          //   `Revisando la llave ${key} con el valor ${row[key]} y con el filtro: #${value}#`,
+          // )
+          switch (typeof row[key]) {
+            case 'string':
+              if (row[key].toLowerCase().includes(value)) {
+                rowResult ||= true
+              }
+              break
+            case 'boolean':
+              if (row[key] === true && 'activa'.includes(value)) {
+                rowResult ||= true
+              } else if (row[key] === false && 'activa'.includes(value)) {
+                rowResult ||= true
+              }
+              break
+          }
+          /* Si el rowResult ya es true, no hace falta seguir revisando */
+          if (rowResult) {
+            return true
+          }
+        }
+        return false
+      },
+    })
+  }
+
   const handleClick = (event: any) => {
     console.log(event)
-    // event.action // {id: 'edit', text: 'Editar'}
-    // event.context // row.id
-    // { action: null }
+    // event.action // Valor de opciones: {id: 'edit', text: 'Editar'}
+    // event.context // Valor asociado a la fila: row.id
+    // { action: null } // Cuando se clica fuera
   }
 </script>
 
@@ -67,9 +134,45 @@
   role="presentation"
   class="mt-6 mb-10 w-full border-t border-zinc-950/10 dark:border-white/10"
 />
-<div class="h-[60%] w-full">
-  <!-- dataKey vincula al elemento que gatilla el menú -->
-  <!-- resolver alimenta el "context" que se obtiene en el onclick -->
+
+<div class="mb-4 flex justify-end">
+  <div class="w-full max-w-[300px]">
+    <Input
+      bind:value={search}
+      type="text"
+      placeholder="Búsqueda en tabla"
+      oninput={(event: any) => {
+        // const value = event.target.value.toLowerCase()
+        filterAllTable()
+      }}
+    >
+      {#snippet right()}
+        {#if search && search.length > 0}
+          <div in:fade>
+            <Button
+              class="cursor-pointer bg-indigo-500 p-1! hover:bg-indigo-400"
+              size="sm"
+              onclick={() => {
+                search = ''
+                filterAllTable()
+              }}
+            >
+              <XMark class="size-4 shrink-0" />
+            </Button>
+          </div>
+        {:else}
+          <div in:fade>
+            <MagnifyingGlass class="size-6 shrink-0 text-gray-400" />
+          </div>
+        {/if}
+      {/snippet}
+    </Input>
+  </div>
+</div>
+
+<div class="flex h-[60%] justify-center">
+  <!-- ↓ dataKey vincula al elemento que gatilla el menú -->
+  <!-- ↓ resolver alimenta el "context" que se obtiene en el onclick -->
   <ActionMenu
     options={[
       {
