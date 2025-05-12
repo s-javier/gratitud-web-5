@@ -9,10 +9,13 @@
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import EditButton from './EditButton.svelte'
   import StatusCell from './StatusCell.svelte'
+  import OrganizationEditing from './OrganizationEditing.svelte'
 
   let { data }: any = $props()
   let table: any = $state()
   let search = $state('')
+  let isEditing = $state(false)
+  let row = $state({})
 
   $effect(() => {
     if ('error' in data && data.error?.server) {
@@ -122,10 +125,16 @@
   }
 
   const handleClick = (event: any) => {
-    console.log(event)
+    // console.log(event)
     // event.action // Valor de opciones: {id: 'edit', text: 'Editar'}
-    // event.context // Valor asociado a la fila: row.id
+    // event.context // Valor asociado a la fila: event.context = row.id
     // { action: null } // Cuando se clica fuera
+    if (event.action?.id === 'edit') {
+      row = JSON.parse(event.context)
+      isEditing = true
+    } else {
+      row = {}
+    }
   }
 </script>
 
@@ -190,7 +199,7 @@
     ]}
     at="point"
     dataKey="actionId"
-    resolver={(id: string) => id}
+    resolver={(row: string) => row}
     api={table}
     onclick={handleClick}
   >
@@ -205,3 +214,5 @@
     </Material>
   </ActionMenu>
 </div>
+
+<OrganizationEditing bind:isOpen={isEditing} {row} />

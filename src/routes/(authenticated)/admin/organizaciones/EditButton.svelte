@@ -10,7 +10,7 @@
     <EllipsisHorizontal class="size-6 shrink-0 text-gray-400 hover:text-indigo-600" />
   </button> -->
   <Button
-    data-action-id={row.id}
+    data-action-id={JSON.stringify(row)}
     variant="text"
     class="h-6! w-10! px-0! text-gray-400 hover:text-indigo-400!"
   >

@@ -131,4 +131,18 @@ export const actions = {
 
     redirect(303, Page.ADMIN_WELCOME)
   },
+  edit: async (event: RequestEvent) => {
+    const data = await event.request.formData()
+    const auxOrganizationId = data.get('organizationId')
+    const organizationId: string = typeof auxOrganizationId === 'string' ? auxOrganizationId : ''
+    const auxTitle = data.get('title')
+    const title: string = typeof auxTitle === 'string' ? auxTitle : ''
+    const auxIsActive = data.get('status')
+    const isActive: boolean = auxIsActive === 'true'
+    console.log({
+      organizationId,
+      title,
+      isActive,
+    })
+  },
 }

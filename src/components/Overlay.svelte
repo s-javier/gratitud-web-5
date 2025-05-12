@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { animate } from 'motion'
+  import type { Snippet } from 'svelte'
 
   const props: {
     isActive: boolean
-    children: any
+    children: Snippet
     type: 'dialog' | 'sidebar'
     width?: string
     zIndex?: string
@@ -43,16 +43,15 @@
     }
   }
 
-  onMount(() => {
-    $inspect(props.isActive).with(async () => {
-      if (props.isActive) {
-        is = true
-        openOverlay()
-      } else {
-        await closeOverlay()
+  $effect(() => {
+    if (props.isActive) {
+      is = true
+      openOverlay()
+    } else {
+      closeOverlay().then(() => {
         is = false
-      }
-    })
+      })
+    }
   })
 </script>
 
