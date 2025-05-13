@@ -24,7 +24,7 @@ export default class Machine {
     this.email = email
   }
 
-  getIsError() {
+  hasError() {
     return Object.keys(this.error).length > 0
   }
 

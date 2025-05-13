@@ -37,17 +37,21 @@
   }
   .status.active::before,
   .active .dot {
-    background: var(--wx-color-success);
+    /* background: var(--wx-color-success); */
+    background: var(--color-green-500);
   }
   .active {
-    color: var(--wx-color-success);
+    /* color: var(--wx-color-success); */
+    color: var(--color-green-500);
   }
   .status.non-active::before,
   .non-active .dot {
-    background: var(--wx-color-font-alt);
+    /* background: var(--wx-color-font-alt); */
+    background: var(--color-red-400);
   }
   .non-active {
-    color: var(--wx-color-font-alt);
+    /* color: var(--wx-color-font-alt); */
+    color: var(--color-red-400);
   }
   .dot {
     height: 6px;

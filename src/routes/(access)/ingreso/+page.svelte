@@ -40,6 +40,7 @@
             loader.is = false
             if ('data' in result && result.data?.error?.email) {
               emailErr = result.data.error.email
+              toast.error('Por favor, corrige el error.', { closable: true })
               return
             }
             if ('data' in result && result.data?.error?.server) {

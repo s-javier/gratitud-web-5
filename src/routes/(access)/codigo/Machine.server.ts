@@ -20,7 +20,7 @@ export default class Machine {
     this.code = code
   }
 
-  getIsError() {
+  hasError() {
     return Object.keys(this.error).length > 0
   }
 

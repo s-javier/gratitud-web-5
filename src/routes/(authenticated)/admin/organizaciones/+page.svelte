@@ -16,12 +16,24 @@
   let search = $state('')
   let isEditing = $state(false)
   let row = $state({})
+  let updated = true
 
   $effect(() => {
+    console.info('Organizaciones')
     if ('error' in data && data.error?.server) {
       toast.error(data.error.server, { closable: true, infinite: true })
     }
+    if (table && updated) {
+      console.log(table.getState().sort)
+      if (table.getState().sort.length > 0) {
+        table.exec('sort-rows', { sortBy: table.getState().sort })
+      }
+    }
   })
+
+  function test() {
+    console.log(table.getState())
+  }
 
   const columns = [
     {
@@ -144,6 +156,8 @@
   class="mt-6 mb-10 w-full border-t border-zinc-950/10 dark:border-white/10"
 />
 
+<button onclick={test}>Test</button>
+
 <div class="mb-4 flex justify-end">
   <div class="w-full max-w-[300px]">
     <Input
@@ -200,8 +214,8 @@
     at="point"
     dataKey="actionId"
     resolver={(row: string) => row}
-    api={table}
     onclick={handleClick}
+    api={table}
   >
     <Material>
       <Grid

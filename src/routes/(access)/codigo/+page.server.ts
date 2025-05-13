@@ -34,7 +34,7 @@ export const actions = {
       await machine.disableMultipleSessions()
     } catch {}
 
-    if (machine.getIsError()) {
+    if (machine.hasError()) {
       return { error: machine.error }
     }
     event.cookies.set('token', machine.session.id, { path: '/' })

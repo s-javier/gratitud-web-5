@@ -56,7 +56,7 @@ export default class Machine {
     return Object.keys(this.errorToRedirectLogin).length > 0
   }
 
-  getIsError() {
+  hasError() {
     return Object.keys(this.error).length > 0
   }
 

@@ -24,7 +24,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
       event.cookies.delete('token', { path: '/' })
       redirect(303, Page.LOGIN)
     }
-    if (auth.getIsError()) {
+    if (auth.hasError()) {
       return { error: auth.error }
     }
     if (auth.getIsErrorToRedirectWelcome()) {

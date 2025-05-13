@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { ActionResult } from '@sveltejs/kit'
-  import { fade } from 'svelte/transition'
   import { applyAction, enhance } from '$app/forms'
-  import { Button, Radio, TextField } from 'noph-ui'
-  import { ExclamationCircle } from 'svelte-heros-v2'
+  import { Button, Radio } from 'noph-ui'
+  import { Helper, Input, Label } from 'flowbite-svelte'
+  import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
   import { toast } from 'svoast'
   import { loader } from '~/stores/loader.svelte'
   import Overlay from '~/components/Overlay.svelte'
@@ -13,7 +13,6 @@
   let title = $state('')
   let titleErr = $state('')
   let status = $state('true')
-  let statusErr = $state('')
 
   $effect(() => {
     title = row.title
@@ -39,39 +38,44 @@
         return async ({ result }: { result: ActionResult }) => {
           await applyAction(result)
           loader.is = false
-          // if ('data' in result && result.data?.error?.email) {
-          //   emailErr = result.data.error.email
-          //   return
-          // }
+          if ('data' in result && result.data?.error?.title) {
+            titleErr = result.data.error.title
+            toast.error('Por favor, corrige el error.', { closable: true })
+            return
+          }
           if ('data' in result && result.data?.error?.server) {
             toast.error(result.data.error.server, { closable: true, infinite: true })
           }
+          isOpen = false
         }
       }}
     >
       <input type="hidden" name="organizationId" value={row.id} />
-      <TextField
-        bind:value={title}
-        type="text"
-        label="Título"
-        name="title"
-        variant="outlined"
-        class="mb-4 w-full"
-        error={titleErr.length > 0}
-        errorText={titleErr}
-        --np-outlined-text-field-label-text-color="var(--color-indigo-600)"
-        --np-outlined-text-field-focus-outline-color="var(--color-indigo-400)"
-        onfocus={() => {
-          titleErr = ''
-        }}
-      >
-        {#snippet end()}
-          {#if titleErr}
-            <ExclamationCircle class="size-5 shrink-0 text-red-500" />
-          {/if}
-        {/snippet}
-      </TextField>
-      <h3>Estado</h3>
+      <section class="mb-5">
+        <Label for="first_name" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}
+          >Título</Label
+        >
+        <Input
+          bind:value={title}
+          type="text"
+          id="first_name"
+          name="title"
+          clearable
+          size="lg"
+          class="bg-white ring-(--o-input-border-focus-color)"
+          color={titleErr ? 'red' : 'default'}
+          onfocus={() => {
+            titleErr = ''
+          }}
+        />
+        {#if titleErr}
+          <Helper class="mt-1" color="red">
+            <!-- <span class="font-medium">Oh, snapp!</span> -->
+            {titleErr}
+          </Helper>
+        {/if}
+      </section>
+      <h3 class="text-base">Estado</h3>
       <section class="flex gap-6">
         <div class="flex items-center">
           <Radio
@@ -82,7 +86,7 @@
             checked
             defaultChecked={true}
             --np-radio-icon-color="var(--color-gray-400)"
-            --np-radio-selected-icon-color="var(--color-indigo-400)"
+            --np-radio-selected-icon-color="var(--o-btn-primary-bg-hover-color)"
           />
           <label for="active">Activa</label>
         </div>
@@ -93,7 +97,7 @@
             value="false"
             id="inactive"
             --np-radio-icon-color="var(--color-gray-400)"
-            --np-radio-selected-icon-color="var(--color-indigo-400)"
+            --np-radio-selected-icon-color="var(--o-btn-primary-bg-hover-color)"
           />
           <label for="inactive">Inactiva</label>
         </div>
@@ -102,8 +106,10 @@
     {#snippet footer()}
       <div class="flex w-full items-center justify-between gap-2">
         <Button
+          variant="outlined"
           onclick={() => (isOpen = false)}
-          --np-filled-button-container-color="var(--color-indigo-600)"
+          --np-outlined-button-container-shape="4px"
+          --np-outlined-button-label-text-color="var(--color-gray-500)"
         >
           Cerrar
         </Button>
@@ -112,8 +118,7 @@
           form="organization-edit"
           variant="filled"
           class="text-center!"
-          --np-filled-button-container-color="var(--color-indigo-600)"
-          --np-filled-button-container-height="42px"
+          --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
           --np-filled-button-container-shape="4px"
         >
           Editar
