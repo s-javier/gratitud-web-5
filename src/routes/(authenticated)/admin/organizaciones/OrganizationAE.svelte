@@ -1,27 +1,61 @@
 <script lang="ts">
   import type { ActionResult } from '@sveltejs/kit'
   import { applyAction, enhance } from '$app/forms'
-  import { Button, Radio } from 'noph-ui'
-  import { Helper, Input, Label } from 'flowbite-svelte'
+  import { Button } from 'noph-ui'
+  import { Helper, Input, Label, Radio } from 'flowbite-svelte'
   import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
   import { toast } from 'svoast'
   import { loader } from '~/stores/loader.svelte'
   import Overlay from '~/components/Overlay.svelte'
   import Modal from '~/components/Modal.svelte'
+  import refreshTable from '~/lib/refresh-table'
+  import { tick } from 'svelte'
 
-  let { isOpen = $bindable(), row } = $props()
+  let { isOpen = $bindable(), ...props } = $props<{
+    isOpen: boolean
+    table: any
+    search: string
+    filterAllTable: () => void
+    row?: any
+  }>()
   let title = $state('')
   let titleErr = $state('')
   let status = $state('true')
+  let titleRef = $state() as HTMLInputElement
+
+  // $effect(() => {
+  //   if (isOpen) {
+  //     console.log('Opening')
+  //     console.log(title)
+  //   }
+  //   if (isOpen && props.row) {
+  //     console.log('Editing')
+  //   }
+  //   if (isOpen && !props.row) {
+  //     console.log('Adding')
+  //   }
+  // })
 
   $effect(() => {
-    title = row.title
-    status = String(row.isActive)
+    if (props.row) {
+      title = props.row.title
+      status = String(props.row.isActive)
+    }
+  })
+
+  $effect(() => {
+    /* ↓ Solo cuando el modal se abre y para cuando se está agregando una nueva organización. */
+    if (isOpen && !props.row) {
+      tick().then(() => titleRef.focus())
+    }
   })
 </script>
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
-  <Modal title="Edición de organización" close={() => (isOpen = false)}>
+  <Modal
+    title={props.row ? 'Edición de organización' : 'Nueva organización'}
+    close={() => (isOpen = false)}
+  >
     <!-- <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
       With less than a month to go before the European Union enacts new consumer privacy laws for
       its citizens, companies around the world are updating their terms of service agreements to
@@ -36,6 +70,8 @@
         toast.removeAll()
         loader.is = true
         return async ({ result }: { result: ActionResult }) => {
+          const sort = props.table.getState().sort
+          const filter = props.table.getState().filter
           await applyAction(result)
           loader.is = false
           if ('data' in result && result.data?.error?.title) {
@@ -47,15 +83,19 @@
             toast.error(result.data.error.server, { closable: true, infinite: true })
           }
           isOpen = false
+          refreshTable(props.table, sort, filter, props.search, props.filterAllTable)
         }
       }}
     >
-      <input type="hidden" name="organizationId" value={row.id} />
+      {#if props.row}
+        <input type="hidden" name="organizationId" value={props.row.id} />
+      {/if}
       <section class="mb-5">
-        <Label for="first_name" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}
-          >Título</Label
-        >
+        <Label for="first_name" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>
+          Título
+        </Label>
         <Input
+          bind:elementRef={titleRef}
           bind:value={title}
           type="text"
           id="first_name"
@@ -67,7 +107,13 @@
           onfocus={() => {
             titleErr = ''
           }}
-        />
+        >
+          {#snippet right()}
+            {#if titleErr}
+              <ExclamationCircleSolid class="size-6 text-red-400" />
+            {/if}
+          {/snippet}
+        </Input>
         {#if titleErr}
           <Helper class="mt-1" color="red">
             <!-- <span class="font-medium">Oh, snapp!</span> -->
@@ -75,32 +121,26 @@
           </Helper>
         {/if}
       </section>
-      <h3 class="text-base">Estado</h3>
-      <section class="flex gap-6">
-        <div class="flex items-center">
-          <Radio
-            bind:group={status}
-            name="status"
-            value="true"
-            id="active"
-            checked
-            defaultChecked={true}
-            --np-radio-icon-color="var(--color-gray-400)"
-            --np-radio-selected-icon-color="var(--o-btn-primary-bg-hover-color)"
-          />
-          <label for="active">Activa</label>
-        </div>
-        <div class="flex items-center">
-          <Radio
-            bind:group={status}
-            name="status"
-            value="false"
-            id="inactive"
-            --np-radio-icon-color="var(--color-gray-400)"
-            --np-radio-selected-icon-color="var(--o-btn-primary-bg-hover-color)"
-          />
-          <label for="inactive">Inactiva</label>
-        </div>
+      <Label class="text-base">Estado</Label>
+      <section class="flex gap-6 pt-2">
+        <Radio
+          name="status"
+          bind:group={status}
+          color="green"
+          value="true"
+          class="*:text-green-400 *:focus:ring-green-400!"
+        >
+          Activa
+        </Radio>
+        <Radio
+          name="status"
+          bind:group={status}
+          color="red"
+          value="false"
+          class="*:text-red-400 *:focus:ring-red-400!"
+        >
+          Inactiva
+        </Radio>
       </section>
     </form>
     {#snippet footer()}
@@ -121,7 +161,7 @@
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
           --np-filled-button-container-shape="4px"
         >
-          Editar
+          {props.row ? 'Editar' : 'Agregar'}
         </Button>
       </div>
     {/snippet}

@@ -6,7 +6,7 @@ import MachineToCRUD from './MachineToCRUD.server'
 export async function load(event: RequestEvent) {
   const machine = new MachineToCRUD()
   try {
-    await machine.read()
+    await machine.readAll()
   } catch {}
   if (machine.hasError()) {
     return { error: machine.error }
@@ -39,7 +39,32 @@ export const actions = {
 
     redirect(303, Page.ADMIN_WELCOME)
   },
-  add: async (event: RequestEvent) => {},
+  add: async (event: RequestEvent) => {
+    const data = await event.request.formData()
+    const auxTitle = data.get('title')
+    const title: string = typeof auxTitle === 'string' ? auxTitle : ''
+    const auxStatus = data.get('status')
+    const status: boolean = auxStatus === 'true'
+    // console.log({
+    //   title,
+    //   status,
+    // })
+
+    const machine = new MachineToCRUD({ title, status })
+
+    try {
+      machine.validateFormToCreate()
+      await machine.create()
+    } catch {}
+
+    if (machine.hasError()) {
+      return {
+        error: machine.error,
+      }
+    }
+
+    redirect(303, Page.ADMIN_ORGANIZATIONS)
+  },
   edit: async (event: RequestEvent) => {
     const data = await event.request.formData()
     const auxOrganizationId = data.get('organizationId')
@@ -54,10 +79,10 @@ export const actions = {
     //   status,
     // })
 
-    const machine = new MachineToCRUD(organizationId, title, status)
+    const machine = new MachineToCRUD({ organizationId, title, status })
 
     try {
-      machine.validateForm()
+      machine.validateFormToUpdate()
       await machine.update()
     } catch {}
 
@@ -67,5 +92,24 @@ export const actions = {
 
     redirect(303, Page.ADMIN_ORGANIZATIONS)
   },
-  delete: async (event: RequestEvent) => {},
+  delete: async (event: RequestEvent) => {
+    const data = await event.request.formData()
+    const auxOrganizationId = data.get('organizationId')
+    const organizationId: string = typeof auxOrganizationId === 'string' ? auxOrganizationId : ''
+
+    const machine = new MachineToCRUD({ organizationId })
+
+    try {
+      machine.validateFormToDelete()
+      await machine.delete()
+    } catch {}
+
+    if (machine.hasError()) {
+      return {
+        error: machine.error,
+      }
+    }
+
+    redirect(303, Page.ADMIN_ORGANIZATIONS)
+  },
 }

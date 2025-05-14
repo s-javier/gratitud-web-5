@@ -6,34 +6,30 @@
   // @ts-ignore
   import { ActionMenu } from 'wx-svelte-menu'
   import { Button, Input } from 'flowbite-svelte'
+  import { Button as ButtonToAdd, Radio } from 'noph-ui'
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import EditButton from './EditButton.svelte'
   import StatusCell from './StatusCell.svelte'
-  import OrganizationEditing from './OrganizationEditing.svelte'
+  import OrganizationAE from './OrganizationAE.svelte'
 
   let { data }: any = $props()
   let table: any = $state()
   let search = $state('')
+  let isAdding = $state(false)
   let isEditing = $state(false)
   let row = $state({})
-  let updated = true
 
   $effect(() => {
-    console.info('Organizaciones')
     if ('error' in data && data.error?.server) {
       toast.error(data.error.server, { closable: true, infinite: true })
     }
-    if (table && updated) {
-      console.log(table.getState().sort)
-      if (table.getState().sort.length > 0) {
-        table.exec('sort-rows', { sortBy: table.getState().sort })
-      }
-    }
   })
 
-  function test() {
-    console.log(table.getState())
-  }
+  $effect(() => {
+    if (search) {
+      filterAllTable()
+    }
+  })
 
   const columns = [
     {
@@ -102,6 +98,7 @@
   ]
 
   const filterAllTable = () => {
+    // console.log('Filtrando...')
     const value = search.toLowerCase()
     table.exec('filter-rows', {
       filter: (row: any) => {
@@ -150,13 +147,27 @@
   }
 </script>
 
-<h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">Organizaciones</h1>
+<section class="flex items-center justify-between">
+  <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
+    Organizaciones
+  </h1>
+  <ButtonToAdd
+    type="button"
+    form="organization-edit"
+    variant="filled"
+    class="text-center! text-sm!"
+    --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
+    --np-filled-button-container-shape="4px"
+    --np-filled-button-container-height="32px"
+    onclick={() => (isAdding = true)}
+  >
+    Agregar
+  </ButtonToAdd>
+</section>
 <hr
   role="presentation"
   class="mt-6 mb-10 w-full border-t border-zinc-950/10 dark:border-white/10"
 />
-
-<button onclick={test}>Test</button>
 
 <div class="mb-4 flex justify-end">
   <div class="w-full max-w-[300px]">
@@ -164,10 +175,7 @@
       bind:value={search}
       type="text"
       placeholder="Búsqueda en tabla"
-      oninput={(event: any) => {
-        // const value = event.target.value.toLowerCase()
-        filterAllTable()
-      }}
+      class="ring-(--o-input-border-focus-color)"
     >
       {#snippet right()}
         {#if search && search.length > 0}
@@ -229,4 +237,14 @@
   </ActionMenu>
 </div>
 
-<OrganizationEditing bind:isOpen={isEditing} {row} />
+<!-- {#if isAdding}
+  <OrganizationAE bind:isOpen={isAdding} {table} {search} {filterAllTable} />
+{:else if isEditing}
+  <OrganizationAE bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
+{/if} -->
+<OrganizationAE bind:isOpen={isAdding} {table} {search} {filterAllTable} />
+<OrganizationAE bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
+<!-- {#key isAdding}
+{/key}
+{#key isEditing}
+{/key} -->

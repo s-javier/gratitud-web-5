@@ -9,25 +9,28 @@ export default class MachineToEdit {
   title: string
   status: boolean
   error: {
+    organizationId?: string
     title?: string
     server?: string
   } = {}
   organizations: any[] = []
 
-  constructor(organizationId: string, title: string, status: boolean)
+  constructor(input: { title: string; status: boolean })
   constructor()
+  constructor(input: { organizationId: string; title: string; status: boolean })
+  constructor(input: { organizationId: string })
 
-  constructor(organizationId?: string, title?: string, status?: boolean) {
-    this.organizationId = organizationId ?? ''
-    this.title = title ?? ''
-    this.status = status ?? false
+  constructor(input: { organizationId?: string; title?: string; status?: boolean } = {}) {
+    this.organizationId = input.organizationId ?? ''
+    this.title = input.title ?? ''
+    this.status = input.status ?? false
   }
 
   hasError() {
     return Object.keys(this.error).length > 0
   }
 
-  validateForm() {
+  validateOrganizationId() {
     const organizationIdErr = v.safeParse(
       v.pipe(
         v.string('El valor de este campo es inválido.'),
@@ -38,9 +41,11 @@ export default class MachineToEdit {
       this.organizationId,
     )
     if (organizationIdErr.issues) {
-      this.error.server = organizationIdErr.issues[0].message
+      this.error.organizationId = organizationIdErr.issues[0].message
     }
+  }
 
+  validateTitle() {
     const titleErr = v.safeParse(
       v.pipe(
         v.string('El valor de este campo es inválido.'),
@@ -53,15 +58,40 @@ export default class MachineToEdit {
     if (titleErr.issues) {
       this.error.title = titleErr.issues[0].message
     }
+  }
 
+  validateForm() {
     if (Object.keys(this.error).length > 0) {
       throw new Error()
     }
   }
 
-  async create() {}
+  validateFormToCreate() {
+    this.validateTitle()
+    this.validateForm()
+  }
 
-  async read() {
+  validateFormToUpdate() {
+    this.validateOrganizationId()
+    this.validateTitle()
+    this.validateForm()
+  }
+
+  validateFormToDelete() {
+    this.validateOrganizationId()
+    this.validateForm()
+  }
+
+  async create() {
+    try {
+      await db.insert(organizationTable).values({ title: this.title, isActive: this.status })
+    } catch (err: any) {
+      rollbar.error('Error en DB. Creación de organización.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async readAll() {
     try {
       this.organizations = await db
         .select({
@@ -91,5 +121,12 @@ export default class MachineToEdit {
     }
   }
 
-  async delete() {}
+  async delete() {
+    try {
+      await db.delete(organizationTable).where(eq(organizationTable.id, this.organizationId))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Eliminación de organización.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
 }
