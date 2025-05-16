@@ -17,6 +17,8 @@
   --svoast-bg: #fff;
   --svoast-text: var(--color-gray-800);
 
+  --o-overlay-loader: var(--color-pink-500);
+
   --o-text-primary-color: var(--color-pink-500);
 
   --o-btn-primary-text-color: white;
