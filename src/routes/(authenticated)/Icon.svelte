@@ -14,19 +14,23 @@
 </script>
 
 {#if title === 'Organizaciones'}
-  <BuildingOffice2 class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <BuildingOffice2
+    class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)"
+  />
 {:else if title === 'Roles'}
-  <Identification class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <Identification
+    class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)"
+  />
 {:else if title === 'Permisos'}
-  <LockOpen class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <LockOpen class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)" />
 {:else if title === 'Usuarios'}
-  <Users class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <Users class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)" />
 {:else if title === 'Páginas de menú'}
-  <Window class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <Window class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)" />
 {:else if title === 'Mis agradecimientos'}
-  <Heart class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <Heart class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)" />
 {:else if title === 'Recordar'}
-  <Clock class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <Clock class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)" />
 {:else if title === 'Pide y se te dará'}
-  <Gift class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600" />
+  <Gift class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)" />
 {/if}
