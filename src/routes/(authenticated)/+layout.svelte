@@ -1,16 +1,12 @@
 <script lang="ts">
   import { fade, fly } from 'svelte/transition'
-  import { toast } from 'svoast'
   import SidebarContent from './SidebarContent.svelte'
 
   let { data, children }: any = $props()
   let showMenu = $state(false)
 
   $effect(() => {
-    console.info('Layout authenticated. Datos:', data)
-    if ('error' in data && data.error?.server) {
-      toast.error(data.error.server, { closable: true, infinite: true })
-    }
+    console.info('/src/routes/(authenticated)/+layout.svelte - Datos:', data)
   })
 </script>
 

@@ -12,26 +12,49 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
     console.info('->', event.request.method, event.route.id, event.url.pathname)
   }
 
+  if ([Page.LOGIN, Page.CODE].includes(event.url.pathname) && event.cookies.get('token')) {
+    redirect(303, Page.ADMIN_WELCOME)
+  }
+
+  /**
+   * Validar autenticación y permisos.
+   */
   if (event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/gratitud')) {
     const sessionId = event.cookies.get('token')
-    const auth = new Auth(sessionId ?? '')
-    let pathname = event.url.pathname
-    if (pathname === '/admin/organizaciones') {
+    let pathname = event.url.pathname /* -> Se utiliza para validar permisos */
+    /* ▼ Permiso artificial */
+    if ([Page.ADMIN_ORGANIZATIONS].includes(pathname)) {
       pathname = Page.ADMIN_WELCOME
     }
-    await auth.validateAuthAndGetMenuAndOrganizationsToChange(pathname)
-    if (auth.getIsErrorToRedirectLogin()) {
+    /* ▲ Permiso artificial */
+    const auth = new Auth({ sessionId, pathname })
+    try {
+      auth.validateSessionId()
+      await auth.getSessionFromMiddleware()
+      auth.validateSessionStatus()
+      auth.validateSessionExpiration()
+      await auth.getUserFromMiddleware()
+      auth.validateUserStatusFromMiddleware()
+      await auth.getUserOrgRole()
+      await auth.getOrganizationsToChange()
+      await auth.getMenu()
+      await auth.getOrganization()
+      await auth.validateOrganizationStatus()
+      await auth.getPermissions()
+      auth.validatePermission()
+    } catch {}
+    if (auth.hasErrorToRedirectLogin()) {
       event.cookies.delete('token', { path: '/' })
       redirect(303, Page.LOGIN)
     }
-    if (auth.hasError()) {
-      return { error: auth.error }
-    }
-    if (auth.getIsErrorToRedirectWelcome()) {
+    /* ↓ Sucede cuando el usuario no tiene la organización activa o no tiene permisos,
+     *   pero sí está autenticado correctamente. */
+    if (auth.hasErrorToRedirectWelcome()) {
       redirect(303, Page.ADMIN_WELCOME)
     }
     event.locals = {
-      userFirstName: auth.session.personFirstName,
+      error: auth.hasError() ? auth.error : null,
+      userFirstName: auth.user.firstName,
       menu: auth.menu,
       organizationsToChange: auth.organizationsToChange,
       userId: auth.session.personId,

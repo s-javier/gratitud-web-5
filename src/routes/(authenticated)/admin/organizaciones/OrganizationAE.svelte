@@ -11,13 +11,18 @@
   import refreshTable from '~/lib/refresh-table'
   import { tick } from 'svelte'
 
-  let { isOpen = $bindable(), ...props } = $props<{
+  let {
+    isOpen = $bindable(),
+    ...props
+  }: {
+    type: string
     isOpen: boolean
     table: any
     search: string
     filterAllTable: () => void
     row?: any
-  }>()
+  } = $props()
+  const uid = $props.id()
   let title = $state('')
   let titleErr = $state('')
   let status = $state('true')
@@ -37,15 +42,14 @@
   // })
 
   $effect(() => {
-    if (props.row) {
+    if (props.type === 'editing') {
       title = props.row.title
       status = String(props.row.isActive)
     }
   })
 
   $effect(() => {
-    /* ↓ Solo cuando el modal se abre y para cuando se está agregando una nueva organización. */
-    if (isOpen && !props.row) {
+    if (isOpen && props.type === 'adding') {
       tick().then(() => titleRef.focus())
     }
   })
@@ -53,96 +57,99 @@
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
   <Modal
-    title={props.row ? 'Edición de organización' : 'Nueva organización'}
+    title={props.type === 'editing' ? 'Edición de organización' : 'Nueva organización'}
     close={() => (isOpen = false)}
   >
-    <!-- <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+    {#if isOpen === true}
+      {uid} - {JSON.stringify(props)}
+      <!-- <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
       With less than a month to go before the European Union enacts new consumer privacy laws for
       its citizens, companies around the world are updating their terms of service agreements to
       comply.
     </p> -->
-    <form
-      id="organization-edit"
-      class="mt-1"
-      method="POST"
-      action="?/edit"
-      use:enhance={() => {
-        toast.removeAll()
-        loader.is = true
-        return async ({ result }: { result: ActionResult }) => {
-          const sort = props.table.getState().sort
-          const filter = props.table.getState().filter
-          await applyAction(result)
-          loader.is = false
-          if ('data' in result && result.data?.error?.title) {
-            titleErr = result.data.error.title
-            toast.error('Por favor, corrige el error.', { closable: true })
-            return
+      <form
+        id="organization-edit"
+        class="mt-1"
+        method="POST"
+        action="?/edit"
+        use:enhance={() => {
+          toast.removeAll()
+          loader.is = true
+          return async ({ result }: { result: ActionResult }) => {
+            const sort = props.table.getState().sort
+            const filter = props.table.getState().filter
+            await applyAction(result)
+            loader.is = false
+            if ('data' in result && result.data?.error?.title) {
+              titleErr = result.data.error.title
+              toast.error('Por favor, corrige el error.', { closable: true })
+              return
+            }
+            if ('data' in result && result.data?.error?.server) {
+              toast.error(result.data.error.server, { closable: true, infinite: true })
+            }
+            isOpen = false
+            refreshTable(props.table, sort, filter, props.search, props.filterAllTable)
           }
-          if ('data' in result && result.data?.error?.server) {
-            toast.error(result.data.error.server, { closable: true, infinite: true })
-          }
-          isOpen = false
-          refreshTable(props.table, sort, filter, props.search, props.filterAllTable)
-        }
-      }}
-    >
-      {#if props.row}
-        <input type="hidden" name="organizationId" value={props.row.id} />
-      {/if}
-      <section class="mb-5">
-        <Label for="first_name" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>
-          Título
-        </Label>
-        <Input
-          bind:elementRef={titleRef}
-          bind:value={title}
-          type="text"
-          id="first_name"
-          name="title"
-          clearable
-          size="lg"
-          class="bg-white ring-(--o-input-border-focus-color)"
-          color={titleErr ? 'red' : 'default'}
-          onfocus={() => {
-            titleErr = ''
-          }}
-        >
-          {#snippet right()}
-            {#if titleErr}
-              <ExclamationCircleSolid class="size-6 text-red-400" />
-            {/if}
-          {/snippet}
-        </Input>
-        {#if titleErr}
-          <Helper class="mt-1" color="red">
-            <!-- <span class="font-medium">Oh, snapp!</span> -->
-            {titleErr}
-          </Helper>
+        }}
+      >
+        {#if props.type === 'editing'}
+          <input type="hidden" name="organizationId" value={props.row.id} />
         {/if}
-      </section>
-      <Label class="text-base">Estado</Label>
-      <section class="flex gap-6 pt-2">
-        <Radio
-          name="status"
-          bind:group={status}
-          color="green"
-          value="true"
-          class="*:text-green-400 *:focus:ring-green-400!"
-        >
-          Activa
-        </Radio>
-        <Radio
-          name="status"
-          bind:group={status}
-          color="red"
-          value="false"
-          class="*:text-red-400 *:focus:ring-red-400!"
-        >
-          Inactiva
-        </Radio>
-      </section>
-    </form>
+        <section class="mb-5">
+          <Label for="first_name" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>
+            Título
+          </Label>
+          <Input
+            bind:elementRef={titleRef}
+            bind:value={title}
+            type="text"
+            id="first_name"
+            name="title"
+            clearable
+            size="lg"
+            class="bg-white ring-(--o-input-border-focus-color)"
+            color={titleErr ? 'red' : 'default'}
+            onfocus={() => {
+              titleErr = ''
+            }}
+          >
+            {#snippet right()}
+              {#if titleErr}
+                <ExclamationCircleSolid class="size-6 text-red-400" />
+              {/if}
+            {/snippet}
+          </Input>
+          {#if titleErr}
+            <Helper class="mt-1" color="red">
+              <!-- <span class="font-medium">Oh, snapp!</span> -->
+              {titleErr}
+            </Helper>
+          {/if}
+        </section>
+        <Label class="text-base">Estado</Label>
+        <section class="flex gap-6 pt-2">
+          <Radio
+            name="status"
+            bind:group={status}
+            color="green"
+            value="true"
+            class="*:text-green-400 *:focus:ring-green-400!"
+          >
+            Activa
+          </Radio>
+          <Radio
+            name="status"
+            bind:group={status}
+            color="red"
+            value="false"
+            class="*:text-red-400 *:focus:ring-red-400!"
+          >
+            Inactiva
+          </Radio>
+        </section>
+      </form>
+    {/if}
     {#snippet footer()}
       <div class="flex w-full items-center justify-between gap-2">
         <Button
@@ -157,11 +164,11 @@
           type="submit"
           form="organization-edit"
           variant="filled"
-          class="text-center!"
+          class="text-center! text-base!"
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
           --np-filled-button-container-shape="4px"
         >
-          {props.row ? 'Editar' : 'Agregar'}
+          {props.type === 'editing' ? 'Editar' : 'Agregar'}
         </Button>
       </div>
     {/snippet}

@@ -1,23 +1,32 @@
 <script lang="ts">
+  import { onMount, type SvelteComponent } from 'svelte'
   import { fade } from 'svelte/transition'
   import { toast } from 'svoast'
   // @ts-ignore
-  import { Grid, Material } from 'wx-svelte-grid'
+  import { Grid } from 'wx-svelte-grid'
+  // import { Grid, Material } from 'wx-svelte-grid'
   // @ts-ignore
   import { ActionMenu } from 'wx-svelte-menu'
   import { Button, Input } from 'flowbite-svelte'
   import { Button as ButtonToAdd, Radio } from 'noph-ui'
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
-  import EditButton from './EditButton.svelte'
+  import TableMenuButton from './TableMenuButton.svelte'
   import StatusCell from './StatusCell.svelte'
   import OrganizationAE from './OrganizationAE.svelte'
 
+  let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
   let table: any = $state()
   let search = $state('')
   let isAdding = $state(false)
   let isEditing = $state(false)
   let row = $state({})
+
+  onMount(async () => {
+    // @ts-ignore
+    const module = await import('wx-svelte-grid')
+    Material = module.Material
+  })
 
   $effect(() => {
     if ('error' in data && data.error?.server) {
@@ -36,7 +45,7 @@
       id: 'menu',
       header: '',
       width: 60,
-      cell: EditButton,
+      cell: TableMenuButton,
     },
     {
       id: 'id',
@@ -202,39 +211,43 @@
 </div>
 
 <div class="flex h-[60%] justify-center">
-  <!-- ↓ dataKey vincula al elemento que gatilla el menú -->
-  <!-- ↓ resolver alimenta el "context" que se obtiene en el onclick -->
-  <ActionMenu
-    options={[
-      {
-        id: 'edit',
-        text: 'Editar',
-        icon: 'wxi wxi-edit',
-        css: 'text-green-600 force-text-inherit',
-      },
-      {
-        id: 'delete',
-        text: 'Eliminar',
-        icon: 'wxi wxi-delete',
-        css: 'text-red-500 force-text-inherit',
-      },
-    ]}
-    at="point"
-    dataKey="actionId"
-    resolver={(row: string) => row}
-    onclick={handleClick}
-    api={table}
-  >
+  {#if Material}
+    <!-- ↓ dataKey vincula al elemento que gatilla el menú -->
+    <!-- ↓ resolver alimenta el "context" que se obtiene en el onclick -->
     <Material>
-      <Grid
-        bind:this={table}
-        data={data.organizations || []}
-        {columns}
-        rowStyle={(row: any) => 'hover:bg-gray-100!'}
-        columnStyle={(col: any) => (col.id === 'isActive' ? 'text-center' : '')}
-      />
+      <ActionMenu
+        options={[
+          {
+            id: 'edit',
+            text: 'Editar',
+            icon: 'wxi wxi-edit',
+            css: 'text-green-600 force-text-inherit',
+          },
+          {
+            id: 'delete',
+            text: 'Eliminar',
+            icon: 'wxi wxi-delete',
+            css: 'text-red-500 force-text-inherit',
+          },
+        ]}
+        at="point"
+        dataKey="actionId"
+        resolver={(row: string) => row}
+        onclick={handleClick}
+        api={table}
+      >
+        <Grid
+          bind:this={table}
+          data={data.organizations || []}
+          {columns}
+          rowStyle={(row: any) => 'hover:bg-gray-100!'}
+          columnStyle={(col: any) => (col.id === 'isActive' ? 'text-center' : '')}
+        />
+      </ActionMenu>
     </Material>
-  </ActionMenu>
+  {:else}
+    <div class="flex h-full items-center justify-center">Cargando...</div>
+  {/if}
 </div>
 
 <!-- {#if isAdding}
@@ -242,8 +255,8 @@
 {:else if isEditing}
   <OrganizationAE bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
 {/if} -->
-<OrganizationAE bind:isOpen={isAdding} {table} {search} {filterAllTable} />
-<OrganizationAE bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
+<OrganizationAE type="adding" bind:isOpen={isAdding} {table} {search} {filterAllTable} />
+<OrganizationAE type="editing" bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
 <!-- {#key isAdding}
 {/key}
 {#key isEditing}

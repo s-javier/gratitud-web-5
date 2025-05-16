@@ -1,12 +1,9 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import { Page } from '~/enums'
 import { NODE_ENV } from '$env/static/private'
-import Machine from './Machine.server'
+import Auth from '~/lib/server/Auth'
 
 export function load(event: RequestEvent) {
-  if (event.cookies.get('token')) {
-    redirect(303, Page.ADMIN_WELCOME)
-  }
   if (event.cookies.get('login') === undefined || event.cookies.get('login') !== 'true') {
     redirect(303, Page.LOGIN)
   }
@@ -24,20 +21,20 @@ export const actions = {
     const auxCode = data.get('otp')
     const code: string = typeof auxCode === 'string' ? auxCode : ''
 
-    const machine = new Machine(timeLimit, code)
+    const auth = new Auth({ timeLimit, code })
     try {
-      machine.validateForm()
-      await machine.getSession()
-      machine.validateCodeIsActive()
-      machine.validateCodeExpiration()
-      await machine.disableCodeAndActiveSession()
-      await machine.disableMultipleSessions()
+      auth.validateTimeLimitAndCode()
+      await auth.getSessionFromCode()
+      auth.validateCodeStatus()
+      auth.validateCodeExpiration()
+      await auth.disableCodeAndActiveSession()
+      await auth.disableMultipleSessions()
     } catch {}
 
-    if (machine.hasError()) {
-      return { error: machine.error }
+    if (auth.hasError()) {
+      return { error: auth.error }
     }
-    event.cookies.set('token', machine.session.id, { path: '/' })
+    event.cookies.set('token', auth.session.id!, { path: '/' })
     redirect(303, Page.ADMIN_WELCOME)
   },
 }

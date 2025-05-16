@@ -4,6 +4,9 @@ declare global {
   namespace App {
     // interface Error {}
     interface Locals {
+      error: {
+        server?: string
+      } | null
       userFirstName: string
       menu: any[]
       organizationsToChange: any[]

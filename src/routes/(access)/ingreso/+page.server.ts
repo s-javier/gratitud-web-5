@@ -1,12 +1,6 @@
 import { type RequestEvent, redirect } from '@sveltejs/kit'
 import { Page } from '~/enums'
-import Machine from './Machine.server'
-
-export function load(event: RequestEvent) {
-  if (event.cookies.get('token')) {
-    redirect(303, Page.ADMIN_WELCOME)
-  }
-}
+import Auth from '~/lib/server/Auth'
 
 export const actions = {
   default: async (event: RequestEvent) => {
@@ -14,17 +8,17 @@ export const actions = {
     const auxEmail = data.get('email')
     const email: string = typeof auxEmail === 'string' ? auxEmail : ''
 
-    const machine = new Machine(email)
+    const auth = new Auth({ email })
     try {
-      machine.validateForm()
-      await machine.getUser()
-      machine.validateUserIsActtive()
-      await machine.createSession()
-      await machine.sendEmail()
+      await auth.validateEmail()
+      await auth.getUserFromLogin()
+      auth.validateUserStatusFromLogin()
+      await auth.createSession()
+      await auth.sendEmail()
     } catch {}
 
-    if (machine.hasError()) {
-      return { error: machine.error }
+    if (auth.hasError()) {
+      return { error: auth.error }
     }
     event.cookies.set('login', 'true', { path: '/' })
     redirect(303, Page.CODE)
