@@ -5,15 +5,15 @@
   import { toast, Toasts } from 'svoast'
   // @ts-ignore
   // import { Willow } from 'wx-svelte-core'
-  import { loader } from '~/stores/loader.svelte'
+  import { overlayLoader } from '~/stores/loader.svelte'
   import LoaderOverlay from '~/components/LoaderOverlay.svelte'
 
   beforeNavigate(() => {
-    loader.is = true
+    overlayLoader.is = true
   })
 
   afterNavigate(() => {
-    loader.is = false
+    overlayLoader.is = false
   })
 
   let isShowError = $state(false)
@@ -33,7 +33,7 @@
   })
 </script>
 
-<!-- <div class="text-right">{loader.is ? 'Cargando' : '~ cargando'}</div> -->
+<!-- <div class="text-right">{overlayLoader.is ? 'Cargando' : '~ cargando'}</div> -->
 {@render children()}
 <!-- <Willow></Willow> -->
 <LoaderOverlay />

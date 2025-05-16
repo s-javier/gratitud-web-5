@@ -5,7 +5,7 @@
   import { Helper, Input, Label, Radio } from 'flowbite-svelte'
   import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
   import { toast } from 'svoast'
-  import { loader } from '~/stores/loader.svelte'
+  import { overlayLoader } from '~/stores/loader.svelte'
   import Overlay from '~/components/Overlay.svelte'
   import Modal from '~/components/Modal.svelte'
   import refreshTable from '~/lib/refresh-table'
@@ -74,12 +74,12 @@
         action="?/edit"
         use:enhance={() => {
           toast.removeAll()
-          loader.is = true
+          overlayLoader.is = true
           return async ({ result }: { result: ActionResult }) => {
             const sort = props.table.getState().sort
             const filter = props.table.getState().filter
             await applyAction(result)
-            loader.is = false
+            overlayLoader.is = false
             if ('data' in result && result.data?.error?.title) {
               titleErr = result.data.error.title
               toast.error('Por favor, corrige el error.', { closable: true })

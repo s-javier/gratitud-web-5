@@ -5,7 +5,7 @@
   // import type { PageProps } from './$types'
   import type { ActionResult } from '@sveltejs/kit'
   import { toast } from 'svoast'
-  import { loader } from '~/stores/loader.svelte'
+  import { overlayLoader } from '~/stores/loader.svelte'
 
   // let { form }: PageProps = $props()
   let emailErr = $state('')
@@ -34,10 +34,10 @@
         method="POST"
         use:enhance={() => {
           toast.removeAll()
-          loader.is = true
+          overlayLoader.is = true
           return async ({ result }: { result: ActionResult }) => {
             await applyAction(result)
-            loader.is = false
+            overlayLoader.is = false
             if ('data' in result && result.data?.error?.email) {
               emailErr = result.data.error.email
               toast.error('Por favor, corrige el error.', { closable: true })
@@ -57,8 +57,8 @@
           class="mb-10 w-full"
           error={emailErr.length > 0}
           errorText={emailErr}
-          --np-outlined-text-field-label-text-color="var(--color-indigo-600)"
-          --np-outlined-text-field-focus-outline-color="var(--color-indigo-400)"
+          --np-outlined-text-field-label-text-color="var(--o-input-label-focus-color)"
+          --np-outlined-text-field-focus-outline-color="var(--o-input-border-focus-color)"
           onfocus={() => {
             emailErr = ''
           }}
@@ -83,8 +83,8 @@
         </TextField>
         <Button
           variant="filled"
-          class="w-full text-center!"
-          --np-filled-button-container-color="var(--color-indigo-600)"
+          class="w-full text-center! text-base!"
+          --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
           --np-filled-button-container-height="42px"
           --np-filled-button-container-shape="4px"
         >

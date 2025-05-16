@@ -1,9 +1,9 @@
 <script lang="ts">
   import Overlay from '~/components/Overlay.svelte'
-  import { loader } from '~/stores/loader.svelte'
+  import { overlayLoader } from '~/stores/loader.svelte'
 </script>
 
-<Overlay type="dialog" isActive={loader.is} zIndex="z-1600">
+<Overlay type="dialog" isActive={overlayLoader.is} zIndex="z-1600">
   <!-- ↓ pink-500 -->
   <svg viewBox="0 0 24 24" fill="#ec4899" class="max-w-36">
     <path

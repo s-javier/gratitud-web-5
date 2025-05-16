@@ -3,7 +3,7 @@
   import { page } from '$app/state'
   import { BuildingOutline, ChevronDownOutline, ChevronUpOutline } from 'flowbite-svelte-icons'
   import { ArrowRightStartOnRectangle } from 'svelte-heros-v2'
-  import { loader } from '~/stores/loader.svelte'
+  import { overlayLoader } from '~/stores/loader.svelte'
   import { toast } from 'svoast'
   import { applyAction, enhance } from '$app/forms'
   import type { ActionResult } from '@sveltejs/kit'
@@ -87,10 +87,10 @@
                     action="/admin/organizaciones?/change"
                     use:enhance={() => {
                       toast.removeAll()
-                      loader.is = true
+                      overlayLoader.is = true
                       return async ({ result }: { result: ActionResult }) => {
                         await applyAction(result)
-                        loader.is = false
+                        overlayLoader.is = false
                         if ('data' in result && result.data?.error?.server) {
                           // @ts-ignore
                           toast.error(result.error.server, {
@@ -125,8 +125,8 @@
               href={menu.path}
               class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold {page.url
                 .pathname === menu.path
-                ? 'bg-gray-50 text-indigo-600'
-                : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'}"
+                ? 'bg-gray-50 text-(--o-btn-primary-bg-color)'
+                : 'text-gray-700 hover:bg-gray-50 hover:text-(--o-btn-primary-bg-color)'}"
             >
               <Icon title={menu.title} />
               {menu.title}
@@ -162,10 +162,10 @@
                 action="/logout"
                 use:enhance={() => {
                   toast.removeAll()
-                  loader.is = true
+                  overlayLoader.is = true
                   return async ({ result }: { result: ActionResult }) => {
                     await applyAction(result)
-                    loader.is = false
+                    overlayLoader.is = false
                     if ('data' in result && result.data?.error?.server) {
                       // @ts-ignore
                       toast.error(result.error.server, {

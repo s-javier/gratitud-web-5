@@ -5,7 +5,7 @@
   import { Button } from 'noph-ui'
   import { OTPInput, OTPRoot } from '@jimmyverburgt/svelte-input-otp'
   import { MinusOutline } from 'flowbite-svelte-icons'
-  import { loader } from '~/stores/loader.svelte'
+  import { overlayLoader } from '~/stores/loader.svelte'
   import { General, Page } from '~/enums'
   import { toast } from 'svoast'
   import { fade } from 'svelte/transition'
@@ -62,10 +62,10 @@
         method="POST"
         use:enhance={() => {
           toast.removeAll()
-          loader.is = true
+          overlayLoader.is = true
           return async ({ result }: { result: ActionResult }) => {
             await applyAction(result)
-            loader.is = false
+            overlayLoader.is = false
             if ('data' in result && result.data?.error?.code) {
               codeErr = result.data.error.code
               return

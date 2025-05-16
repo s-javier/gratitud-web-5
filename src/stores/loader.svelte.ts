@@ -1,3 +1,3 @@
-export const loader = $state({
+export const overlayLoader = $state({
   is: false,
 })
