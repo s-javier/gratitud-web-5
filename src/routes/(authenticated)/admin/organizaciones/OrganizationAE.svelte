@@ -1,15 +1,16 @@
 <script lang="ts">
+  import { tick } from 'svelte'
   import type { ActionResult } from '@sveltejs/kit'
   import { applyAction, enhance } from '$app/forms'
   import { Button } from 'noph-ui'
   import { Helper, Input, Label, Radio } from 'flowbite-svelte'
   import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
   import { toast } from 'svoast'
+  import { XMark } from 'svelte-heros-v2'
   import { overlayLoader } from '~/stores/loader.svelte'
   import Overlay from '~/components/Overlay.svelte'
   import Modal from '~/components/Modal.svelte'
   import refreshTable from '~/lib/refresh-table'
-  import { tick } from 'svelte'
 
   let {
     isOpen = $bindable(),
@@ -22,24 +23,11 @@
     filterAllTable: () => void
     row?: any
   } = $props()
-  const uid = $props.id()
+  // const uid = $props.id()
   let title = $state('')
   let titleErr = $state('')
   let status = $state('true')
   let titleRef = $state() as HTMLInputElement
-
-  // $effect(() => {
-  //   if (isOpen) {
-  //     console.log('Opening')
-  //     console.log(title)
-  //   }
-  //   if (isOpen && props.row) {
-  //     console.log('Editing')
-  //   }
-  //   if (isOpen && !props.row) {
-  //     console.log('Adding')
-  //   }
-  // })
 
   $effect(() => {
     if (props.type === 'editing') {
@@ -61,7 +49,6 @@
     close={() => (isOpen = false)}
   >
     {#if isOpen === true}
-      {uid} - {JSON.stringify(props)}
       <!-- <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
       With less than a month to go before the European Union enacts new consumer privacy laws for
       its citizens, companies around the world are updating their terms of service agreements to
@@ -71,7 +58,7 @@
         id="organization-edit"
         class="mt-1"
         method="POST"
-        action="?/edit"
+        action={props.type === 'adding' ? '?/add' : '?/edit'}
         use:enhance={() => {
           toast.removeAll()
           overlayLoader.is = true
@@ -100,23 +87,39 @@
           <Label for="first_name" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>
             Título
           </Label>
+          <!-- clearable -->
+          <!-- clearableClass="cursor-pointer hover:text-(--o-text-primary-color)" -->
           <Input
-            bind:elementRef={titleRef}
-            bind:value={title}
             type="text"
             id="first_name"
             name="title"
-            clearable
             size="lg"
-            class="bg-white ring-(--o-input-border-focus-color)"
             color={titleErr ? 'red' : 'default'}
-            onfocus={() => {
-              titleErr = ''
-            }}
           >
+            {#snippet children(props)}
+              <input
+                bind:this={titleRef}
+                bind:value={title}
+                {...props}
+                class="{props.class} bg-white ring-(--o-input-border-focus-color)"
+                onfocus={() => {
+                  titleErr = ''
+                }}
+              />
+            {/snippet}
             {#snippet right()}
               {#if titleErr}
                 <ExclamationCircleSolid class="size-6 text-red-400" />
+              {:else if title.length > 0}
+                <button
+                  type="button"
+                  class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
+                  onclick={() => {
+                    title = ''
+                  }}
+                >
+                  <XMark class="size-5 shrink-0 cursor-pointer" />
+                </button>
               {/if}
             {/snippet}
           </Input>

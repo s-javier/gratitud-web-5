@@ -8,7 +8,7 @@
   // @ts-ignore
   import { ActionMenu } from 'wx-svelte-menu'
   import { Button, Input } from 'flowbite-svelte'
-  import { Button as ButtonToAdd, Radio } from 'noph-ui'
+  import { Button as NophButton } from 'noph-ui'
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import TableMenuButton from './TableMenuButton.svelte'
   import StatusCell from './StatusCell.svelte'
@@ -160,7 +160,7 @@
   <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
     Organizaciones
   </h1>
-  <ButtonToAdd
+  <NophButton
     type="button"
     form="organization-edit"
     variant="filled"
@@ -171,7 +171,7 @@
     onclick={() => (isAdding = true)}
   >
     Agregar
-  </ButtonToAdd>
+  </NophButton>
 </section>
 <hr
   role="presentation"
@@ -184,25 +184,24 @@
       bind:value={search}
       type="text"
       placeholder="Búsqueda en tabla"
-      class="ring-(--o-input-border-focus-color)"
+      class="bg-white! ring-(--o-input-border-focus-color)"
     >
       {#snippet right()}
-        {#if search && search.length > 0}
+        {#if search.length > 0}
           <div in:fade>
-            <Button
-              class="cursor-pointer bg-indigo-500 p-1! hover:bg-indigo-400"
-              size="sm"
+            <button
+              class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
               onclick={() => {
                 search = ''
                 filterAllTable()
               }}
             >
-              <XMark class="size-4 shrink-0" />
-            </Button>
+              <XMark class="size-5 shrink-0 cursor-pointer" />
+            </button>
           </div>
         {:else}
           <div in:fade>
-            <MagnifyingGlass class="size-6 shrink-0 text-gray-400" />
+            <MagnifyingGlass class="size-5 shrink-0 text-gray-400" />
           </div>
         {/if}
       {/snippet}
