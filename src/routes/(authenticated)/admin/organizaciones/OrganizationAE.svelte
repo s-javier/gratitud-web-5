@@ -21,7 +21,11 @@
     table: any
     search: string
     filterAllTable: () => void
-    row?: any
+    row?: {
+      id: string
+      title: string
+      isActive: boolean
+    } | null
   } = $props()
   // const uid = $props.id()
   let title = $state('')
@@ -30,9 +34,9 @@
   let titleRef = $state() as HTMLInputElement
 
   $effect(() => {
-    if (props.type === 'editing') {
-      title = props.row.title
-      status = String(props.row.isActive)
+    if (props.row && props.type === 'editing') {
+      title = props.row!.title
+      status = String(props.row!.isActive)
     }
   })
 
@@ -67,13 +71,15 @@
             const filter = props.table.getState().filter
             await applyAction(result)
             overlayLoader.is = false
-            if ('data' in result && result.data?.error?.title) {
-              titleErr = result.data.error.title
-              toast.error('Por favor, corrige el error.', { closable: true })
+            if ('data' in result && result.data?.error) {
+              if (result.data?.error?.title) {
+                titleErr = result.data.error.title
+                toast.error('Por favor, corrige el error.', { closable: true })
+              }
+              if (result.data?.error?.server) {
+                toast.error(result.data.error.server, { closable: true, infinite: true })
+              }
               return
-            }
-            if ('data' in result && result.data?.error?.server) {
-              toast.error(result.data.error.server, { closable: true, infinite: true })
             }
             isOpen = false
             refreshTable(props.table, sort, filter, props.search, props.filterAllTable)
@@ -81,7 +87,7 @@
         }}
       >
         {#if props.type === 'editing'}
-          <input type="hidden" name="organizationId" value={props.row.id} />
+          <input type="hidden" name="organizationId" value={props.row!.id} />
         {/if}
         <section class="mb-5">
           <Label for="first_name" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>

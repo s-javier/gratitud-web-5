@@ -7,12 +7,13 @@
   // import { Grid, Material } from 'wx-svelte-grid'
   // @ts-ignore
   import { ActionMenu } from 'wx-svelte-menu'
-  import { Button, Input } from 'flowbite-svelte'
+  import { Input } from 'flowbite-svelte'
   import { Button as NophButton } from 'noph-ui'
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import TableMenuButton from './TableMenuButton.svelte'
   import StatusCell from './StatusCell.svelte'
   import OrganizationAE from './OrganizationAE.svelte'
+  import OrganizationDelete from './OrganizationDelete.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -20,7 +21,8 @@
   let search = $state('')
   let isAdding = $state(false)
   let isEditing = $state(false)
-  let row = $state({})
+  let isDeleting = $state(false)
+  let row = $state(null)
 
   onMount(async () => {
     // @ts-ignore
@@ -150,8 +152,11 @@
     if (event.action?.id === 'edit') {
       row = JSON.parse(event.context)
       isEditing = true
+    } else if (event.action?.id === 'delete') {
+      row = JSON.parse(event.context)
+      isDeleting = true
     } else {
-      row = {}
+      row = null
     }
   }
 </script>
@@ -184,11 +189,14 @@
       bind:value={search}
       type="text"
       placeholder="Búsqueda en tabla"
-      class="bg-white! ring-(--o-input-border-focus-color)"
+      class="bg-white! px-9 ring-(--o-input-border-focus-color)"
     >
+      {#snippet left()}
+        <MagnifyingGlass class="size-5 shrink-0 text-gray-400" />
+      {/snippet}
       {#snippet right()}
         {#if search.length > 0}
-          <div in:fade>
+          <div transition:fade>
             <button
               class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
               onclick={() => {
@@ -198,10 +206,6 @@
             >
               <XMark class="size-5 shrink-0 cursor-pointer" />
             </button>
-          </div>
-        {:else}
-          <div in:fade>
-            <MagnifyingGlass class="size-5 shrink-0 text-gray-400" />
           </div>
         {/if}
       {/snippet}
@@ -249,14 +253,6 @@
   {/if}
 </div>
 
-<!-- {#if isAdding}
-  <OrganizationAE bind:isOpen={isAdding} {table} {search} {filterAllTable} />
-{:else if isEditing}
-  <OrganizationAE bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
-{/if} -->
 <OrganizationAE type="adding" bind:isOpen={isAdding} {table} {search} {filterAllTable} />
 <OrganizationAE type="editing" bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
-<!-- {#key isAdding}
-{/key}
-{#key isEditing}
-{/key} -->
+<OrganizationDelete bind:isOpen={isDeleting} {table} {search} {filterAllTable} {row} />

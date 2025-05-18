@@ -45,10 +45,6 @@ export const actions = {
     const title: string = typeof auxTitle === 'string' ? auxTitle : ''
     const auxStatus = data.get('status')
     const status: boolean = auxStatus === 'true'
-    // console.log({
-    //   title,
-    //   status,
-    // })
 
     const machine = new MachineToCRUD({ title, status })
 
@@ -96,8 +92,10 @@ export const actions = {
     const data = await event.request.formData()
     const auxOrganizationId = data.get('organizationId')
     const organizationId: string = typeof auxOrganizationId === 'string' ? auxOrganizationId : ''
+    const auxIsConfirmed = data.get('isConfirmed')
+    const isConfirmed: boolean = auxIsConfirmed === 'true'
 
-    const machine = new MachineToCRUD({ organizationId })
+    const machine = new MachineToCRUD({ isConfirmed, organizationId })
 
     try {
       machine.validateFormToDelete()

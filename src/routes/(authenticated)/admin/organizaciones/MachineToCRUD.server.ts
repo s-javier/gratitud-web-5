@@ -8,22 +8,32 @@ export default class MachineToEdit {
   organizationId: string
   title: string
   status: boolean
+  isConfirmed: boolean
   error: {
     organizationId?: string
     title?: string
     server?: string
+    isConfirmed?: string
   } = {}
   organizations: any[] = []
 
   constructor(input: { title: string; status: boolean })
   constructor()
   constructor(input: { organizationId: string; title: string; status: boolean })
-  constructor(input: { organizationId: string })
+  constructor(input: { isConfirmed: boolean; organizationId: string })
 
-  constructor(input: { organizationId?: string; title?: string; status?: boolean } = {}) {
+  constructor(
+    input: {
+      organizationId?: string
+      title?: string
+      status?: boolean
+      isConfirmed?: boolean
+    } = {},
+  ) {
     this.organizationId = input.organizationId ?? ''
     this.title = input.title ?? ''
     this.status = input.status ?? false
+    this.isConfirmed = input.isConfirmed ?? false
   }
 
   hasError() {
@@ -60,6 +70,12 @@ export default class MachineToEdit {
     }
   }
 
+  validateIsConfirmed() {
+    if (!this.isConfirmed) {
+      this.error.isConfirmed = 'Si vas a eliminar, por favor, confirma.'
+    }
+  }
+
   validateForm() {
     if (Object.keys(this.error).length > 0) {
       throw new Error()
@@ -79,6 +95,7 @@ export default class MachineToEdit {
 
   validateFormToDelete() {
     this.validateOrganizationId()
+    this.validateIsConfirmed()
     this.validateForm()
   }
 
