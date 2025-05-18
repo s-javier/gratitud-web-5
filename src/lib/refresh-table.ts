@@ -1,9 +1,11 @@
+import filterAllTableByText from './filter-all-table-by-text'
+
 export default function (
   table: any,
   initSort: any[],
   initFilter: any,
   search: string,
-  filterAllTable: any,
+  rows: number,
 ) {
   // console.log('1. ***', sort)
   if (initSort.length > 0) {
@@ -25,6 +27,6 @@ export default function (
   }
 
   if (search) {
-    filterAllTable()
+    filterAllTableByText(table, search, rows)
   }
 }

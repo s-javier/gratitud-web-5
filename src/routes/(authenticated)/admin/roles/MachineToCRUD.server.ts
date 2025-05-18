@@ -1,38 +1,36 @@
 import * as v from 'valibot'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/server/db'
-import { organizationTable } from '~/lib/server/db/schema'
+import { roleTable } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
 
 export default class MachineToCRUD {
-  organizationId: string
+  roleId: string
   title: string
-  status: boolean
   isConfirmed: boolean
   error: {
-    organizationId?: string
+    roleId?: string
     title?: string
     isConfirmed?: string
     server?: string
   } = {}
-  organizations: any[] = []
+  roles: any[] = []
 
-  constructor(input: { title: string; status: boolean })
+  constructor(input: { title: string })
   constructor()
-  constructor(input: { organizationId: string; title: string; status: boolean })
-  constructor(input: { isConfirmed: boolean; organizationId: string })
+  constructor(input: { roleId: string; title: string })
+  constructor(input: { isConfirmed: boolean; roleId: string })
 
   constructor(
     input: {
-      organizationId?: string
+      roleId?: string
       title?: string
       status?: boolean
       isConfirmed?: boolean
     } = {},
   ) {
-    this.organizationId = input.organizationId ?? ''
+    this.roleId = input.roleId ?? ''
     this.title = input.title ?? ''
-    this.status = input.status ?? false
     this.isConfirmed = input.isConfirmed ?? false
   }
 
@@ -40,18 +38,18 @@ export default class MachineToCRUD {
     return Object.keys(this.error).length > 0
   }
 
-  validateOrganizationId() {
-    const organizationIdErr = v.safeParse(
+  validateRoleId() {
+    const roleIdErr = v.safeParse(
       v.pipe(
         v.string('El valor de este campo es inválido.'),
         v.trim(),
         v.nonEmpty('Este campo es requerido.'),
         v.uuid('El valor de este campo es inválido.'),
       ),
-      this.organizationId,
+      this.roleId,
     )
-    if (organizationIdErr.issues) {
-      this.error.organizationId = organizationIdErr.issues[0].message
+    if (roleIdErr.issues) {
+      this.error.roleId = roleIdErr.issues[0].message
     }
   }
 
@@ -88,37 +86,36 @@ export default class MachineToCRUD {
   }
 
   validateFormToUpdate() {
-    this.validateOrganizationId()
+    this.validateRoleId()
     this.validateTitle()
     this.validateForm()
   }
 
   validateFormToDelete() {
-    this.validateOrganizationId()
+    this.validateRoleId()
     this.validateIsConfirmed()
     this.validateForm()
   }
 
   async create() {
     try {
-      await db.insert(organizationTable).values({ title: this.title, isActive: this.status })
+      await db.insert(roleTable).values({ title: this.title })
     } catch (err: any) {
-      rollbar.error('Error en DB. Creación de organización.', err)
+      rollbar.error('Error en DB. Creación de rol.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }
 
   async readAll() {
     try {
-      this.organizations = await db
+      this.roles = await db
         .select({
-          id: organizationTable.id,
-          title: organizationTable.title,
-          isActive: organizationTable.isActive,
+          id: roleTable.id,
+          title: roleTable.title,
         })
-        .from(organizationTable)
+        .from(roleTable)
     } catch (err: any) {
-      rollbar.error('Error en DB. Obtener todas las organizaciones.', err)
+      rollbar.error('Error en DB. Obtener todas los roles.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }
@@ -126,23 +123,22 @@ export default class MachineToCRUD {
   async update() {
     try {
       await db
-        .update(organizationTable)
+        .update(roleTable)
         .set({
           title: this.title,
-          isActive: this.status,
         })
-        .where(eq(organizationTable.id, this.organizationId))
+        .where(eq(roleTable.id, this.roleId))
     } catch (err: any) {
-      rollbar.error('Error en DB. Actualización de organización.', err)
+      rollbar.error('Error en DB. Actualización de rol.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }
 
   async delete() {
     try {
-      await db.delete(organizationTable).where(eq(organizationTable.id, this.organizationId))
+      await db.delete(roleTable).where(eq(roleTable.id, this.roleId))
     } catch (err: any) {
-      rollbar.error('Error en DB. Eliminación de organización.', err)
+      rollbar.error('Error en DB. Eliminación de rol.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }

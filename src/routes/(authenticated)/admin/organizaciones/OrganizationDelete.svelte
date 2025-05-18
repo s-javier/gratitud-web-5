@@ -17,7 +17,7 @@
     isOpen: boolean
     table: any
     search: string
-    filterAllTable: () => void
+    rows: number
     row: {
       id: string
       title: string
@@ -85,7 +85,7 @@
             return
           }
           isOpen = false
-          refreshTable(props.table, sort, filter, props.search, props.filterAllTable)
+          refreshTable(props.table, sort, filter, props.search, props.rows)
         }
       }}
     >

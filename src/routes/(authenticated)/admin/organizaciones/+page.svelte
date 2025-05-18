@@ -8,12 +8,13 @@
   // @ts-ignore
   import { ActionMenu } from 'wx-svelte-menu'
   import { Input } from 'flowbite-svelte'
-  import { Button as NophButton } from 'noph-ui'
+  import { Button } from 'noph-ui'
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
-  import TableMenuButton from './TableMenuButton.svelte'
-  import StatusCell from './StatusCell.svelte'
+  import TableMenuButton from '~/components/TableMenuButton.svelte'
+  import StatusCell from '~/components/StatusCell.svelte'
   import OrganizationAE from './OrganizationAE.svelte'
   import OrganizationDelete from './OrganizationDelete.svelte'
+  import filterAllTableByText from '~/lib/filter-all-table-by-text'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -37,18 +38,10 @@
   })
 
   $effect(() => {
-    if (search) {
-      filterAllTable()
-    }
+    filterAllTableByText(table, search, data.organizations.length)
   })
 
   const columns = [
-    {
-      id: 'menu',
-      header: '',
-      width: 60,
-      cell: TableMenuButton,
-    },
     {
       id: 'id',
       header: 'ID',
@@ -106,43 +99,13 @@
       // text: 'Activa|Inactiva',
       // template: (isActive: boolean) => (isActive ? 'Sí' : 'No'),
     },
+    {
+      id: 'menu',
+      header: '',
+      width: 60,
+      cell: TableMenuButton,
+    },
   ]
-
-  const filterAllTable = () => {
-    // console.log('Filtrando...')
-    const value = search.toLowerCase()
-    table.exec('filter-rows', {
-      filter: (row: any) => {
-        // console.log('-> Fila')
-        const keys = Object.keys(row)
-        let rowResult = false
-        for (let key of keys) {
-          // console.log(
-          //   `Revisando la llave ${key} con el valor ${row[key]} y con el filtro: #${value}#`,
-          // )
-          switch (typeof row[key]) {
-            case 'string':
-              if (row[key].toLowerCase().includes(value)) {
-                rowResult ||= true
-              }
-              break
-            case 'boolean':
-              if (row[key] === true && 'activa'.includes(value)) {
-                rowResult ||= true
-              } else if (row[key] === false && 'activa'.includes(value)) {
-                rowResult ||= true
-              }
-              break
-          }
-          /* Si el rowResult ya es true, no hace falta seguir revisando */
-          if (rowResult) {
-            return true
-          }
-        }
-        return false
-      },
-    })
-  }
 
   const handleClick = (event: any) => {
     // console.log(event)
@@ -165,7 +128,7 @@
   <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
     Organizaciones
   </h1>
-  <NophButton
+  <Button
     type="button"
     form="organization-edit"
     variant="filled"
@@ -176,7 +139,7 @@
     onclick={() => (isAdding = true)}
   >
     Agregar
-  </NophButton>
+  </Button>
 </section>
 <hr
   role="presentation"
@@ -201,7 +164,7 @@
               class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
               onclick={() => {
                 search = ''
-                filterAllTable()
+                filterAllTableByText(table, search, data.organizations.length)
               }}
             >
               <XMark class="size-5 shrink-0 cursor-pointer" />
@@ -253,6 +216,25 @@
   {/if}
 </div>
 
-<OrganizationAE type="adding" bind:isOpen={isAdding} {table} {search} {filterAllTable} />
-<OrganizationAE type="editing" bind:isOpen={isEditing} {table} {search} {filterAllTable} {row} />
-<OrganizationDelete bind:isOpen={isDeleting} {table} {search} {filterAllTable} {row} />
+<OrganizationAE
+  type="adding"
+  bind:isOpen={isAdding}
+  {table}
+  {search}
+  rows={data?.organizations.length ?? 0}
+/>
+<OrganizationAE
+  type="editing"
+  bind:isOpen={isEditing}
+  {table}
+  {search}
+  rows={data?.organizations.length ?? 0}
+  {row}
+/>
+<OrganizationDelete
+  bind:isOpen={isDeleting}
+  {table}
+  {search}
+  rows={data?.organizations.length ?? 0}
+  {row}
+/>
