@@ -1,15 +1,18 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import { Page } from '~/enums'
-import MachineToCRUD from './MachineToCRUD.server'
+import MachineFromRoleToCRUD from '~/routes/(authenticated)/admin/roles/MachineToCRUD.server'
+import MachineFromPermissionToCRUD from '~/routes/(authenticated)/admin/permisos/MachineToCRUD.server'
 
 export async function load(event: RequestEvent) {
   console.log(event.params.roleId)
-  // const machine = new MachineToCRUD()
+  // const machineFromRole = new MachineFromRoleToCRUD()
+  // const machineFromPermission = new MachineFromPermissionToCRUD()
   // try {
-  //   await machine.readAll()
+  //   await machineFromRole.readOne(event.params.roleId)
+  //   await machineFromPermissions.readByRoleId(event.params.roleId)
   // } catch {}
   // if (machine.hasError()) {
   //   return { error: machine.error }
   // }
-  // return { roles: machine.roles }
+  // return { role: machineFromRole.role, permissions: machineFromPermissions.permissions }
 }
