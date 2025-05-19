@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, type SvelteComponent } from 'svelte'
   import { fade } from 'svelte/transition'
+  import { goto } from '$app/navigation'
   import { toast } from 'svoast'
   // @ts-ignore
   import { Grid } from 'wx-svelte-grid'
@@ -13,6 +14,7 @@
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
   import RoleAE from './RoleAE.svelte'
   import RoleDelete from './RoleDelete.svelte'
+  import { Page } from '~/enums'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -69,18 +71,6 @@
       cell: TableMenuButton,
     },
   ]
-
-  const handleClick = (event: any) => {
-    if (event.action?.id === 'edit') {
-      row = JSON.parse(event.context)
-      isEditing = true
-    } else if (event.action?.id === 'delete') {
-      row = JSON.parse(event.context)
-      isDeleting = true
-    } else {
-      row = null
-    }
-  }
 </script>
 
 <section class="flex items-center justify-between">
@@ -141,6 +131,12 @@
       <ActionMenu
         options={[
           {
+            id: 'permissions',
+            text: 'Permisos',
+            icon: 'wxi wxi-eye',
+            css: 'text-blue-500 force-text-inherit',
+          },
+          {
             id: 'edit',
             text: 'Editar',
             icon: 'wxi wxi-edit',
@@ -156,7 +152,19 @@
         at="point"
         dataKey="actionId"
         resolver={(row: string) => row}
-        onclick={handleClick}
+        onclick={(event: any) => {
+          if (event.action?.id === 'permissions') {
+            goto(`${Page.ADMIN_ROLE}/${JSON.parse(event.context).id}`)
+          } else if (event.action?.id === 'edit') {
+            row = JSON.parse(event.context)
+            isEditing = true
+          } else if (event.action?.id === 'delete') {
+            row = JSON.parse(event.context)
+            isDeleting = true
+          } else {
+            row = null
+          }
+        }}
         api={table}
       >
         <Grid

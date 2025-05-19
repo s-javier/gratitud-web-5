@@ -23,7 +23,10 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
     const sessionId = event.cookies.get('token')
     let pathname = event.url.pathname /* -> Se utiliza para validar permisos */
     /* ▼ Permiso artificial */
-    if ([Page.ADMIN_ORGANIZATIONS].includes(pathname)) {
+    if (
+      [Page.ADMIN_ORGANIZATIONS].includes(pathname) ||
+      event.url.pathname.startsWith(Page.ADMIN_ROLE)
+    ) {
       pathname = Page.ADMIN_WELCOME
     }
     /* ▲ Permiso artificial */

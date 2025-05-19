@@ -106,22 +106,6 @@
       cell: TableMenuButton,
     },
   ]
-
-  const handleClick = (event: any) => {
-    // console.log(event)
-    // event.action // Valor de opciones: {id: 'edit', text: 'Editar'}
-    // event.context // Valor asociado a la fila: event.context = row.id
-    // { action: null } // Cuando se clica fuera
-    if (event.action?.id === 'edit') {
-      row = JSON.parse(event.context)
-      isEditing = true
-    } else if (event.action?.id === 'delete') {
-      row = JSON.parse(event.context)
-      isDeleting = true
-    } else {
-      row = null
-    }
-  }
 </script>
 
 <section class="flex items-center justify-between">
@@ -199,7 +183,21 @@
         at="point"
         dataKey="actionId"
         resolver={(row: string) => row}
-        onclick={handleClick}
+        onclick={(event: any) => {
+          // console.log(event)
+          // event.action // Valor de opciones: {id: 'edit', text: 'Editar'}
+          // event.context // Valor asociado a la fila: event.context = row.id
+          // { action: null } // Cuando se clica fuera
+          if (event.action?.id === 'edit') {
+            row = JSON.parse(event.context)
+            isEditing = true
+          } else if (event.action?.id === 'delete') {
+            row = JSON.parse(event.context)
+            isDeleting = true
+          } else {
+            row = null
+          }
+        }}
         api={table}
       >
         <Grid
