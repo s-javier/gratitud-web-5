@@ -38,7 +38,7 @@
   })
 
   $effect(() => {
-    filterAllTableByText(table, search, data.organizations.length)
+    filterAllTableByText(table, search, data?.organizations?.length ?? 0)
   })
 
   const columns = [
@@ -148,7 +148,6 @@
               class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
               onclick={() => {
                 search = ''
-                filterAllTableByText(table, search, data.organizations.length)
               }}
             >
               <XMark class="size-5 shrink-0 cursor-pointer" />
