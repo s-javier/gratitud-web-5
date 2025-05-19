@@ -3,8 +3,8 @@
   import type { ActionResult } from '@sveltejs/kit'
   import { applyAction, enhance } from '$app/forms'
   import { Button } from 'noph-ui'
-  import { Helper, Input, Label, Radio } from 'flowbite-svelte'
   import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
+  import { Helper, Input, Label } from 'flowbite-svelte'
   import { toast } from 'svoast'
   import { XMark } from 'svelte-heros-v2'
   import { overlayLoader } from '~/stores/loader.svelte'
@@ -24,19 +24,15 @@
     row?: {
       id: string
       title: string
-      isActive: boolean
     } | null
   } = $props()
-  // const uid = $props.id()
   let title = $state('')
   let titleErr = $state('')
-  let status = $state('true')
   let titleRef = $state() as HTMLInputElement
 
   $effect(() => {
     if (props.row && props.type === 'editing') {
       title = props.row!.title
-      status = String(props.row!.isActive)
     }
   })
 
@@ -49,17 +45,12 @@
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
   <Modal
-    title={props.type === 'editing' ? 'Edición de organización' : 'Nueva organización'}
+    title={props.type === 'editing' ? 'Edición de rol' : 'Nuevo rol'}
     close={() => (isOpen = false)}
   >
     {#if isOpen === true}
-      <!-- <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-      With less than a month to go before the European Union enacts new consumer privacy laws for
-      its citizens, companies around the world are updating their terms of service agreements to
-      comply.
-    </p> -->
       <form
-        id="organization"
+        id="role"
         method="POST"
         action={props.type === 'adding' ? '?/add' : '?/edit'}
         use:enhance={() => {
@@ -86,12 +77,10 @@
         }}
       >
         {#if props.type === 'editing'}
-          <input type="hidden" name="organizationId" value={props.row!.id} />
+          <input type="hidden" name="roleId" value={props.row!.id} />
         {/if}
-        <section class="mb-5">
+        <section>
           <Label for="title" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>Título</Label>
-          <!-- clearable -->
-          <!-- clearableClass="cursor-pointer hover:text-(--o-text-primary-color)" -->
           <Input type="text" id="title" name="title" size="lg" color={titleErr ? 'red' : 'default'}>
             {#snippet children(props)}
               <input
@@ -122,31 +111,9 @@
           </Input>
           {#if titleErr}
             <Helper class="mt-1" color="red">
-              <!-- <span class="font-medium">Oh, snapp!</span> -->
               {titleErr}
             </Helper>
           {/if}
-        </section>
-        <Label class="text-base">Estado</Label>
-        <section class="flex gap-6 pt-2">
-          <Radio
-            name="status"
-            bind:group={status}
-            color="green"
-            value="true"
-            class="*:text-green-400 *:focus:ring-green-400!"
-          >
-            Activa
-          </Radio>
-          <Radio
-            name="status"
-            bind:group={status}
-            color="red"
-            value="false"
-            class="*:text-red-400 *:focus:ring-red-400!"
-          >
-            Inactiva
-          </Radio>
         </section>
       </form>
     {/if}
@@ -162,7 +129,7 @@
         </Button>
         <Button
           type="submit"
-          form="organization"
+          form="role"
           variant="filled"
           class="text-center! text-base!"
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"

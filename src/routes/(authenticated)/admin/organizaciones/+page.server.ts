@@ -17,15 +17,13 @@ export async function load(event: RequestEvent) {
 export const actions = {
   change: async (event: RequestEvent) => {
     const data = await event.request.formData()
-    const auxOrganizationId = data.get('organizationId')
-    const organizationId: string = typeof auxOrganizationId === 'string' ? auxOrganizationId : ''
+    const organizationId = data.get('organizationId')?.toString() || ''
 
     const machine = new MachineToChange(
       event.locals.userId,
       event.locals.organizationId,
       organizationId,
     )
-
     try {
       machine.validateOrganizationId()
       await machine.getOrganizationToChange()
@@ -40,14 +38,11 @@ export const actions = {
     redirect(303, Page.ADMIN_WELCOME)
   },
   add: async (event: RequestEvent) => {
-    const data = await event.request.formData()
-    const auxTitle = data.get('title')
-    const title: string = typeof auxTitle === 'string' ? auxTitle : ''
-    const auxStatus = data.get('status')
-    const status: boolean = auxStatus === 'true'
+    const formData = await event.request.formData()
+    const title = formData.get('title')?.toString() || ''
+    const status = formData.get('status')?.toString() === 'true' || false
 
     const machine = new MachineToCRUD({ title, status })
-
     try {
       machine.validateFormToCreate()
       await machine.create()
@@ -62,21 +57,12 @@ export const actions = {
     redirect(303, Page.ADMIN_ORGANIZATIONS)
   },
   edit: async (event: RequestEvent) => {
-    const data = await event.request.formData()
-    const auxOrganizationId = data.get('organizationId')
-    const organizationId: string = typeof auxOrganizationId === 'string' ? auxOrganizationId : ''
-    const auxTitle = data.get('title')
-    const title: string = typeof auxTitle === 'string' ? auxTitle : ''
-    const auxStatus = data.get('status')
-    const status: boolean = auxStatus === 'true'
-    // console.log({
-    //   organizationId,
-    //   title,
-    //   status,
-    // })
+    const formData = await event.request.formData()
+    const organizationId = formData.get('organizationId')?.toString() || ''
+    const title = formData.get('title')?.toString() || ''
+    const status = formData.get('status')?.toString() === 'true' || false
 
     const machine = new MachineToCRUD({ organizationId, title, status })
-
     try {
       machine.validateFormToUpdate()
       await machine.update()
@@ -89,14 +75,11 @@ export const actions = {
     redirect(303, Page.ADMIN_ORGANIZATIONS)
   },
   delete: async (event: RequestEvent) => {
-    const data = await event.request.formData()
-    const auxOrganizationId = data.get('organizationId')
-    const organizationId: string = typeof auxOrganizationId === 'string' ? auxOrganizationId : ''
-    const auxIsConfirmed = data.get('isConfirmed')
-    const isConfirmed: boolean = auxIsConfirmed === 'true'
+    const formData = await event.request.formData()
+    const organizationId = formData.get('organizationId')?.toString() || ''
+    const isConfirmed = formData.get('isConfirmed')?.toString() === 'true' || false
 
     const machine = new MachineToCRUD({ isConfirmed, organizationId })
-
     try {
       machine.validateFormToDelete()
       await machine.delete()

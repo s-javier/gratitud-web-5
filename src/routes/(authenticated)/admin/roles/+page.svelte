@@ -11,6 +11,8 @@
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import TableMenuButton from '~/components/TableMenuButton.svelte'
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
+  import RoleAE from './RoleAE.svelte'
+  import RoleDelete from './RoleDelete.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -170,3 +172,14 @@
     <div class="flex h-full items-center justify-center">Cargando...</div>
   {/if}
 </div>
+
+<RoleAE type="adding" bind:isOpen={isAdding} {table} {search} rows={data?.roles.length ?? 0} />
+<RoleAE
+  type="editing"
+  bind:isOpen={isEditing}
+  {table}
+  {search}
+  rows={data?.roles.length ?? 0}
+  {row}
+/>
+<RoleDelete bind:isOpen={isDeleting} {table} {search} rows={data?.roles.length ?? 0} {row} />
