@@ -192,7 +192,11 @@ export default class MachineToCRUD {
         .from(permissionTable)
         .where(eq(permissionTable.id, permissionId))
       const roles = await db
-        .select({ id: rolePermissionTable.roleId, title: roleTable.title })
+        .select({
+          id: rolePermissionTable.roleId,
+          title: roleTable.title,
+          rolePermissionId: rolePermissionTable.id,
+        })
         .from(rolePermissionTable)
         .where(eq(rolePermissionTable.permissionId, permissionId))
         .innerJoin(roleTable, eq(roleTable.id, rolePermissionTable.roleId))

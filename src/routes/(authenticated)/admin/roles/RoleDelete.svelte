@@ -41,7 +41,7 @@
 </script>
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
-  <Modal title={`Eliminar rol ${title}`} close={() => (isOpen = false)}>
+  <Modal title={`Eliminación de rol ${title}`} close={() => (isOpen = false)}>
     <section class="mb-6">
       <p class="mb-2 text-base leading-relaxed text-gray-500 dark:text-gray-400">
         ¿Estás seguro de eliminar el rol <b>{title}</b>?

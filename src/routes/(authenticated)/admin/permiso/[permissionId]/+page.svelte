@@ -13,6 +13,7 @@
   import TableMenuButton from '~/components/TableMenuButton.svelte'
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
   import { Page } from '~/enums'
+  import RoleDeleteRelation from './RoleDeleteRelation.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -37,7 +38,7 @@
   })
 
   $effect(() => {
-    filterAllTableByText(table, search, data?.permissions?.length ?? 0)
+    filterAllTableByText(table, search, data?.permissionAndRoles?.roles?.length ?? 0)
   })
 
   const initTable = (api: any) => {
@@ -221,3 +222,11 @@
     <div class="flex h-full items-center justify-center">Cargando...</div>
   {/if}
 </div>
+
+<RoleDeleteRelation
+  bind:isOpen={isDeleting}
+  {table}
+  {search}
+  rows={data?.permissionAndRoles?.roles?.length ?? 0}
+  {row}
+/>

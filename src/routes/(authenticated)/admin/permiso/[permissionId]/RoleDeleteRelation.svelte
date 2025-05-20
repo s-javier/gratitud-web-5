@@ -20,19 +20,17 @@
     rows: number
     row: {
       id: string
-      path: string
-      type: string
+      title: string
+      rolePermissionId: string
     } | null
   } = $props()
-  let path = $state('')
-  let type = $state('')
+  let title = $state('')
   let isConfirmed = $state(false)
   let isConfirmedErr = $state('')
 
   $effect(() => {
     if (props.row) {
-      path = props.row.path
-      type = props.row.type
+      title = props.row.title
       isConfirmed = false
       isConfirmedErr = ''
     }
@@ -44,20 +42,17 @@
 </script>
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
-  <Modal
-    title={`Eliminación de permiso de tipo ${type === 'view' ? 'vista' : 'API'}`}
-    close={() => (isOpen = false)}
-  >
+  <Modal title={`Eliminación de relación con rol ${title}`} close={() => (isOpen = false)}>
     <section class="mb-6">
       <p class="mb-2 text-base leading-relaxed text-gray-500 dark:text-gray-400">
-        ¿Estás seguro de eliminar el permiso <b>{path}</b>?
+        ¿Estás seguro de eliminar la relación con el rol <b>{title}</b>?
       </p>
       <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
         Considere que esta acción no se puede deshacer.
       </p>
     </section>
     <form
-      id="permission-delete"
+      id="permission-delete-relation-role"
       method="POST"
       action="?/delete"
       use:enhance={() => {
@@ -87,7 +82,7 @@
         }
       }}
     >
-      <input type="hidden" name="permissionId" value={props.row?.id} />
+      <input type="hidden" name="roleId" value={props?.row?.rolePermissionId} />
       <div class="rounded-sm border {isConfirmedErr ? 'border-red-400' : 'border-gray-300'}">
         <Checkbox
           name="isConfirmed"
@@ -96,7 +91,7 @@
           divClass="w-full p-4"
           class="size-5 text-(--o-btn-primary-bg-hover-color)! focus:ring-(--o-btn-primary-bg-hover-color)!"
         >
-          Confirmo que deseo eliminar el permiso.
+          Confirmo que deseo eliminar la relación.
         </Checkbox>
       </div>
       {#if isConfirmedErr}
@@ -115,7 +110,7 @@
         </Button>
         <Button
           type="submit"
-          form="permission-delete"
+          form="permission-delete-relation-role"
           variant="filled"
           class="text-center! text-base!"
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"

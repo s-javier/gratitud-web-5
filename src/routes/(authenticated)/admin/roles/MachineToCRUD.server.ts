@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import { eq } from 'drizzle-orm'
 import db from '~/lib/server/db'
-import { roleTable } from '~/lib/server/db/schema'
+import { rolePermissionTable, roleTable } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
 
 export default class MachineToCRUD {
@@ -15,6 +15,14 @@ export default class MachineToCRUD {
     server?: string
   } = {}
   roles: any[] = []
+  roleAndPermissions?: {
+    id: string
+    title: string
+    permissions: {
+      id: string
+      title: string
+    }[]
+  }
 
   constructor(input: { title: string })
   constructor()
@@ -117,6 +125,68 @@ export default class MachineToCRUD {
     } catch (err: any) {
       rollbar.error('Error en DB. Obtener todas los roles.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async readAllWithPermissions() {
+    let query: any[] = []
+    try {
+      query = await db
+        .select({
+          id: roleTable.id,
+          title: roleTable.title,
+          permissionId: rolePermissionTable.permissionId,
+        })
+        .from(roleTable)
+        .leftJoin(rolePermissionTable, eq(rolePermissionTable.permissionId, roleTable.id))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Obtener todos los roles con sus permisos.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+      throw new Error()
+    }
+    this.roles = query.reduce(
+      (roles, item: any) => {
+        const role = roles.find((p: any) => p.id === item.id)
+        if (role) {
+          if (item.roleId) {
+            role.permissions.push(item.roleId)
+          }
+        } else {
+          roles.push({
+            id: item.id,
+            title: item.title,
+            permissions: item.permissionId ? [item.permissionId] : [],
+          })
+        }
+        return roles
+      },
+      [] as { id: string; title: string; permissions: string[] }[],
+    )
+  }
+
+  async readOneByIdWithPermissions(roleId: string) {
+    try {
+      const role = await db
+        .select({
+          id: roleTable.id,
+          title: roleTable.title,
+        })
+        .from(roleTable)
+        .where(eq(roleTable.id, roleId))
+      const permissions = await db
+        .select({
+          id: rolePermissionTable.roleId,
+          title: roleTable.title,
+          rolePermissionId: rolePermissionTable.id,
+        })
+        .from(rolePermissionTable)
+        .where(eq(rolePermissionTable.permissionId, roleId))
+        .innerJoin(roleTable, eq(roleTable.id, rolePermissionTable.roleId))
+      this.roleAndPermissions = { ...role[0], permissions }
+    } catch (err: any) {
+      rollbar.error('Error en DB. Obtener un permiso con sus roles.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+      throw new Error()
     }
   }
 
