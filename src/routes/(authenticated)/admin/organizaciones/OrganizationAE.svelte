@@ -1,9 +1,10 @@
 <script lang="ts">
   import { tick } from 'svelte'
+  import { fade } from 'svelte/transition'
   import type { ActionResult } from '@sveltejs/kit'
   import { applyAction, enhance } from '$app/forms'
   import { Button } from 'noph-ui'
-  import { Helper, Input, Label, Radio } from 'flowbite-svelte'
+  import { Input, Label, Radio } from 'flowbite-svelte'
   import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
   import { toast } from 'svoast'
   import { XMark } from 'svelte-heros-v2'
@@ -121,10 +122,9 @@
             {/snippet}
           </Input>
           {#if titleErr}
-            <Helper class="mt-1" color="red">
-              <!-- <span class="font-medium">Oh, snapp!</span> -->
+            <p in:fade class="mt-1 text-xs text-red-500">
               {titleErr}
-            </Helper>
+            </p>
           {/if}
         </section>
         <Label class="text-base">Estado</Label>

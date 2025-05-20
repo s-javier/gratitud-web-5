@@ -5,7 +5,7 @@ import MachineToCRUD from '~/routes/(authenticated)/admin/permisos/MachineToCRUD
 export async function load(event: RequestEvent) {
   const machine = new MachineToCRUD()
   try {
-    await machine.readOneByIdWithRoles(event.params.roleId || '')
+    await machine.readOneByIdWithRoles(event.params.permissionId || '')
   } catch {}
   if (machine.hasError()) {
     return { error: machine.error }

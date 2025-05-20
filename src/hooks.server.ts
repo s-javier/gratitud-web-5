@@ -25,7 +25,8 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
     /* ▼ Permiso artificial */
     if (
       [Page.ADMIN_ORGANIZATIONS].includes(pathname) ||
-      event.url.pathname.startsWith(Page.ADMIN_ROLE)
+      event.url.pathname.startsWith(Page.ADMIN_ROLE) ||
+      event.url.pathname.startsWith(Page.ADMIN_PERMISSION)
     ) {
       pathname = Page.ADMIN_WELCOME
     }

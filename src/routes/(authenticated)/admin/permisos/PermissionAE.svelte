@@ -1,10 +1,11 @@
 <script lang="ts">
   import { tick } from 'svelte'
+  import { fade } from 'svelte/transition'
   import type { ActionResult } from '@sveltejs/kit'
   import { applyAction, enhance } from '$app/forms'
   import { Button } from 'noph-ui'
   import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
-  import { Helper, Input, Label, Select } from 'flowbite-svelte'
+  import { Input, Label, Select } from 'flowbite-svelte'
   import { toast } from 'svoast'
   import { XMark } from 'svelte-heros-v2'
   import { overlayLoader } from '~/stores/loader.svelte'
@@ -120,9 +121,9 @@
             {/snippet}
           </Input>
           {#if pathErr}
-            <Helper class="mt-1" color="red">
+            <p in:fade class="mt-1 text-xs text-red-500">
               {pathErr}
-            </Helper>
+            </p>
           {/if}
         </section>
         <section>
@@ -146,9 +147,9 @@
             }}
           />
           {#if permissionTypeErr}
-            <Helper class="mt-1" color="red">
+            <p in:fade class="mt-1 text-xs text-red-500">
               {permissionTypeErr}
-            </Helper>
+            </p>
           {/if}
         </section>
       </form>

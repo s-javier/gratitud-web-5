@@ -12,8 +12,6 @@
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import TableMenuButton from '~/components/TableMenuButton.svelte'
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
-  import PermissionAE from './PermissionAE.svelte'
-  import PermissionDelete from './PermissionDelete.svelte'
   import { Page } from '~/enums'
 
   let Material: typeof SvelteComponent | null = $state(null)
@@ -42,17 +40,17 @@
     filterAllTableByText(table, search, data?.permissions?.length ?? 0)
   })
 
-  const initTable = (api: any) => {
-    api.getReactiveState().flatData.subscribe((value: any) => {
-      filteredRows = value.length
-    })
-  }
-
   const columns = [
     {
-      id: 'path',
+      id: 'id',
+      header: 'ID',
+      // footer: 'ID',
+      width: 300,
+    },
+    {
+      id: 'title',
       header: [
-        'Ruta',
+        'Rol',
         {
           filter: {
             type: 'text',
@@ -63,46 +61,7 @@
           },
         },
       ],
-      width: 320,
       sort: true,
-    },
-    {
-      id: 'type',
-      header: [
-        'Tipo',
-        {
-          filter: {
-            type: 'richselect',
-            config: {
-              // template: (option: any) => {
-              //   return option.label ? 'Activa' : 'Inactiva'
-              // },
-              options: [
-                { id: 'api', label: 'API' },
-                { id: 'view', label: 'Vista' },
-              ],
-              handler: (value: string, filter: string) => {
-                if (!filter) {
-                  return true
-                }
-                return (
-                  (value === 'api' && filter === 'api') || (value === 'view' && filter === 'view')
-                )
-              },
-            },
-          },
-        },
-      ],
-      width: 90,
-      sort: true,
-      template: (type: string) => (type ? (type === 'api' ? 'API' : 'Vista') : ''),
-    },
-    {
-      id: 'roles',
-      header: 'Roles',
-      width: 70,
-      sort: true,
-      template: (roles: string[]) => roles.length,
     },
     {
       id: 'menu',
@@ -111,10 +70,18 @@
       cell: TableMenuButton,
     },
   ]
+
+  const initTable = (api: any) => {
+    api.getReactiveState().flatData.subscribe((value: any) => {
+      filteredRows = value.length
+    })
+  }
 </script>
 
 <section class="flex items-center justify-between">
-  <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">Permisos</h1>
+  <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
+    Permiso: {data?.permissionAndRoles?.path || 'Hubo un error'}
+  </h1>
   <Button
     type="button"
     form="organization-edit"
@@ -125,7 +92,7 @@
     --np-filled-button-container-height="32px"
     onclick={() => (isAdding = true)}
   >
-    Agregar
+    Vincular a rol
   </Button>
 </section>
 <hr
@@ -133,17 +100,50 @@
   class="mt-6 mb-10 w-full border-t border-zinc-950/10 dark:border-white/10"
 />
 
+<section class="mb-10 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+  <!-- <div class="px-4 py-6 sm:px-6">
+    <h3 class="text-base/7 font-semibold text-gray-900">Infomración del permiso</h3>
+    <p class="mt-1 max-w-2xl text-sm/6 text-gray-500">Personal details and application.</p>
+  </div> -->
+  <div class="border-t border-gray-100">
+    <dl class="divide-y divide-gray-100">
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">ID</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.permissionAndRoles?.id || 'Hubo un error'}
+        </dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">Ruta</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.permissionAndRoles?.path || 'Hubo un error'}
+        </dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">Tipo</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.permissionAndRoles?.type === 'view'
+            ? 'Vista'
+            : data?.permissionAndRoles?.type === 'api'
+              ? 'API'
+              : ''}
+        </dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
 <section class="items-top mb-4 flex justify-between">
   <div class="text-sm text-gray-500">
     <p>
-      {data?.permissions?.length === 1 ? 'Existe' : 'Existen'}
-      {data?.permissions?.length ?? 0}
-      {data?.permissions?.length === 1 ? 'permiso' : 'permisos'}.
+      {data?.permissionAndRoles?.roles?.length === 1 ? 'Existe' : 'Existen'}
+      {data?.permissionAndRoles?.roles?.length ?? 0}
+      {data?.permissionAndRoles?.roles?.length === 1 ? 'rol' : 'roles'}.
     </p>
-    {#if table && filteredRows < data?.permissions?.length}
+    {#if table && filteredRows < data?.permissionAndRoles?.roles?.length}
       <p transition:fade>
         Estás viendo {filteredRows}
-        {filteredRows === 1 ? 'permiso' : 'permisos'}.
+        {filteredRows === 1 ? 'rol' : 'roles'}.
       </p>
     {/if}
   </div>
@@ -183,20 +183,8 @@
       <ActionMenu
         options={[
           {
-            id: 'roles',
-            text: 'Roles',
-            icon: 'wxi wxi-eye',
-            css: 'text-blue-500 force-text-inherit',
-          },
-          {
-            id: 'edit',
-            text: 'Editar',
-            icon: 'wxi wxi-edit',
-            css: 'text-green-600 force-text-inherit',
-          },
-          {
             id: 'delete',
-            text: 'Eliminar',
+            text: 'Eliminar relación',
             icon: 'wxi wxi-delete',
             css: 'text-red-500 force-text-inherit',
           },
@@ -205,8 +193,8 @@
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {
-          if (event.action?.id === 'roles') {
-            goto(`${Page.ADMIN_PERMISSION}/${JSON.parse(event.context).id}`)
+          if (event.action?.id === 'permissions') {
+            goto(`${Page.ADMIN_ROLE}/${JSON.parse(event.context).id}`)
           } else if (event.action?.id === 'edit') {
             row = JSON.parse(event.context)
             isEditing = true
@@ -222,7 +210,7 @@
         <Grid
           init={initTable}
           bind:this={table}
-          data={data.permissions || []}
+          data={data?.permissionAndRoles?.roles || []}
           {columns}
           rowStyle={(row: any) => 'hover:bg-gray-100!'}
           columnStyle={(col: any) => (col.id === 'isActive' ? 'text-center' : '')}
@@ -233,26 +221,3 @@
     <div class="flex h-full items-center justify-center">Cargando...</div>
   {/if}
 </div>
-
-<PermissionAE
-  type="adding"
-  bind:isOpen={isAdding}
-  {table}
-  {search}
-  rows={data?.permissions.length ?? 0}
-/>
-<PermissionAE
-  type="editing"
-  bind:isOpen={isEditing}
-  {table}
-  {search}
-  rows={data?.permissions.length ?? 0}
-  {row}
-/>
-<PermissionDelete
-  bind:isOpen={isDeleting}
-  {table}
-  {search}
-  rows={data?.permissions.length ?? 0}
-  {row}
-/>

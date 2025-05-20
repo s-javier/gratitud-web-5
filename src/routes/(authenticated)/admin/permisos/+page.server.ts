@@ -5,7 +5,7 @@ import MachineToCRUD from './MachineToCRUD.server'
 export async function load() {
   const machine = new MachineToCRUD()
   try {
-    await machine.readAll()
+    await machine.readAllWithRoles()
   } catch {}
   if (machine.hasError()) {
     return { error: machine.error }
