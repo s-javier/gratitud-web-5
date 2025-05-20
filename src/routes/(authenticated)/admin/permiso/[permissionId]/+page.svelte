@@ -40,6 +40,12 @@
     filterAllTableByText(table, search, data?.permissions?.length ?? 0)
   })
 
+  const initTable = (api: any) => {
+    api.getReactiveState().flatData.subscribe((value: any) => {
+      filteredRows = value.length
+    })
+  }
+
   const columns = [
     {
       id: 'id',
@@ -70,12 +76,6 @@
       cell: TableMenuButton,
     },
   ]
-
-  const initTable = (api: any) => {
-    api.getReactiveState().flatData.subscribe((value: any) => {
-      filteredRows = value.length
-    })
-  }
 </script>
 
 <section class="flex items-center justify-between">

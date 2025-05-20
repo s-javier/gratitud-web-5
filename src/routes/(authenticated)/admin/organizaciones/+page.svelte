@@ -24,6 +24,7 @@
   let isEditing = $state(false)
   let isDeleting = $state(false)
   let row = $state(null)
+  let filteredRows = $state(0)
 
   onMount(async () => {
     // @ts-ignore
@@ -40,6 +41,12 @@
   $effect(() => {
     filterAllTableByText(table, search, data?.organizations?.length ?? 0)
   })
+
+  const initTable = (api: any) => {
+    api.getReactiveState().flatData.subscribe((value: any) => {
+      filteredRows = value.length
+    })
+  }
 
   const columns = [
     {
@@ -130,7 +137,20 @@
   class="mt-6 mb-10 w-full border-t border-zinc-950/10 dark:border-white/10"
 />
 
-<div class="mb-4 flex justify-end">
+<section class="items-top mb-4 flex justify-between">
+  <div class="text-sm text-gray-500">
+    <p>
+      {data?.organizations?.length === 1 ? 'Existe' : 'Existen'}
+      {data?.organizations?.length ?? 0}
+      {data?.organizations?.length === 1 ? 'organización' : 'organizaciones'}.
+    </p>
+    {#if table && filteredRows < data?.organizations?.length}
+      <p transition:fade>
+        Estás viendo {filteredRows}
+        {filteredRows === 1 ? 'organización' : 'organizaciones'}.
+      </p>
+    {/if}
+  </div>
   <div class="w-full max-w-[300px]">
     <Input
       bind:value={search}
@@ -157,7 +177,7 @@
       {/snippet}
     </Input>
   </div>
-</div>
+</section>
 
 <div class="flex h-[60%] justify-center">
   {#if Material}
@@ -200,6 +220,7 @@
         api={table}
       >
         <Grid
+          init={initTable}
           bind:this={table}
           data={data.organizations || []}
           {columns}
