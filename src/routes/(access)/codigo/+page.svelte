@@ -136,8 +136,8 @@
 
         <Button
           variant="filled"
-          class="mb-10 w-full text-center!"
-          --np-filled-button-container-color="var(--color-indigo-600)"
+          class="w-full text-center! text-base!"
+          --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
           --np-filled-button-container-height="42px"
           --np-filled-button-container-shape="4px"
           disabled={timeLimit === 0}
@@ -148,7 +148,10 @@
 
       <div class="line rounded-md bg-slate-200 p-4 text-sm">
         Si el código no lo recibiste o tienes algún problema, por favor, presiona
-        <a href="/ingreso" class="cursor-pointer font-bold text-indigo-500 hover:underline">
+        <a
+          href="/ingreso"
+          class="cursor-pointer font-bold text-(--o-text-primary-color) hover:underline"
+        >
           aquí
         </a>
         para que ingreses nuevamente tu email y recibirás un nuevo código.
