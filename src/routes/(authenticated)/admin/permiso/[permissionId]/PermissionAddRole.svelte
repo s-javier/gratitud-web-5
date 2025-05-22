@@ -13,7 +13,6 @@
   import refreshTable from '~/lib/refresh-table'
 
   import CheckIcon from '@lucide/svelte/icons/check'
-  // import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down'
   import * as Command from '~/components/ui/command'
   import * as Popover from '~/components/ui/popover'
   import { cn } from '~/lib/utils'
@@ -37,34 +36,35 @@
     search: string
     rows: number
     id: string
-    title: string
-    permissions: {
+    path: string
+    type: string
+    roles: {
       id: string
-      path: string
-      type: string
+      title: string
     }[]
   } = $props()
-  let permissionId = $state('')
-  let permissionIdErr = $state('')
+  let roleId = $state('')
+  let roleIdErr = $state('')
 
-  const missingPermissions = $derived(
-    props.permissions.map((permission) => {
+  const missingRoles = $derived(
+    props.roles.map((role) => {
       return {
-        label: `${permission.type === 'view' ? 'Vista' : 'API'} - ${permission.path}`,
-        value: permission.id,
+        label: role.title,
+        value: role.id,
       }
     }),
   )
-  const selectedValue = $derived(missingPermissions.find((i) => i.value === permissionId)?.label)
+  const selectedValue = $derived(missingRoles.find((i) => i.value === roleId)?.label)
 </script>
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
-  <Modal title="Nueva relación con permiso" close={() => (isOpen = false)}>
+  <Modal title="Nueva relación con rol" close={() => (isOpen = false)}>
     <section class="mb-4">
-      <p><b>Rol</b>: {props.title}.</p>
+      <p><b>Ruta</b>: {props.path}.</p>
+      <p><b>Tipo</b>: {props.type ? (props.type === 'view' ? 'vista' : 'API') : ''}.</p>
     </section>
     <form
-      id="role-relation-with-permission"
+      id="permission-relation-with-role"
       class="space-y-4"
       method="POST"
       action="?/add"
@@ -77,8 +77,8 @@
           await applyAction(result)
           overlayLoader.is = false
           if ('data' in result && result.data?.error) {
-            if (result.data?.error?.permissionId) {
-              permissionIdErr = result.data.error.permissionId
+            if (result.data?.error?.roleId) {
+              roleIdErr = result.data.error.roleId
               toast.error('Por favor, corrige el formulario.', { closable: true })
             }
             if (result.data?.error?.server) {
@@ -91,34 +91,9 @@
         }
       }}
     >
-      <input type="hidden" name="roleId" value={props.id} />
-      <input type="hidden" name="permissionId" value={permissionId} />
-      <Label for="type" class={cn('mb-1 text-base', permissionIdErr && 'text-red-500')}>
-        Permiso
-      </Label>
-      <!-- <section>
-        <Label for="type" class="mb-1 text-base" color={permissionIdErr ? 'red' : 'gray'}>
-          Permiso
-        </Label>
-        <Select
-          name="type"
-          class="*:bg-white *:ring-(--o-input-border-focus-color)"
-          color={permissionIdErr ? 'red' : 'default'}
-          size="lg"
-          items={missingPermissions}
-          placeholder=""
-          bind:value={permissionId}
-          clearable
-          onfocus={() => {
-            permissionIdErr = ''
-          }}
-        />
-        {#if permissionIdErr}
-          <p in:fade class="mt-1 text-xs text-red-500">
-            {permissionIdErr}
-          </p>
-        {/if}
-      </section> -->
+      <input type="hidden" name="permissionId" value={props.id} />
+      <input type="hidden" name="roleId" value={roleId} />
+      <Label for="type" class={cn('mb-1 text-base', roleIdErr && 'text-red-500')}>Rol</Label>
       <Popover.Root bind:open>
         <Popover.Trigger bind:ref={triggerRef}>
           {#snippet child({ props })}
@@ -128,7 +103,7 @@
                 'mb-0 flex min-h-12.5 items-center justify-between',
                 'rounded-lg border-1 border-gray-300 py-3 pr-3 pl-4',
                 open && 'border-(--o-input-border-focus-color)',
-                permissionIdErr && 'border-red-500',
+                roleIdErr && 'border-red-500',
               )}
               aria-expanded={open}
             >
@@ -136,13 +111,13 @@
                 {selectedValue || ''}
               </div>
               <div class="flex items-center gap-x-2">
-                {#if permissionId !== ''}
+                {#if roleId !== ''}
                   <button
                     type="button"
                     class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
                     onclick={(e) => {
                       e.stopPropagation()
-                      permissionId = ''
+                      roleId = ''
                       open = false
                     }}
                   >
@@ -163,16 +138,16 @@
             <Command.List>
               <Command.Empty>Permiso no encontrado.</Command.Empty>
               <Command.Group>
-                {#each missingPermissions as item}
+                {#each missingRoles as item}
                   <Command.Item
                     value={item.label}
                     onSelect={() => {
-                      permissionId = item.value
+                      roleId = item.value
                       closeAndFocusTrigger()
                     }}
                   >
                     <CheckIcon
-                      class={cn('mr-2 size-4', permissionId !== item.value && 'text-transparent')}
+                      class={cn('mr-2 size-4', roleId !== item.value && 'text-transparent')}
                     />
                     {item.label}
                   </Command.Item>
@@ -182,9 +157,9 @@
           </Command.Root>
         </Popover.Content>
       </Popover.Root>
-      {#if permissionIdErr}
+      {#if roleIdErr}
         <p in:fade class="mt-1 text-xs text-red-500">
-          {permissionIdErr}
+          {roleIdErr}
         </p>
       {/if}
     </form>
@@ -200,7 +175,7 @@
         </Button>
         <Button
           type="submit"
-          form="role-relation-with-permission"
+          form="permission-relation-with-role"
           variant="filled"
           class="text-center! text-base!"
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"

@@ -14,6 +14,7 @@
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
   import { Page } from '~/enums'
   import RoleDeleteRelation from './RoleDeleteRelation.svelte'
+  import PermissionAddRole from './PermissionAddRole.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -225,4 +226,14 @@
   {search}
   rows={data?.permissionAndRoles?.roles?.length ?? 0}
   {row}
+/>
+<PermissionAddRole
+  bind:isOpen={isAdding}
+  {table}
+  {search}
+  rows={data?.permissionAndRoles?.roles?.length ?? 0}
+  id={data?.permissionAndRoles?.id}
+  path={data?.permissionAndRoles?.path}
+  type={data?.permissionAndRoles?.type}
+  roles={data?.permissionAndRoles?.missingRoles}
 />

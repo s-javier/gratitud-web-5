@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import { eq, isNull, ne, or } from 'drizzle-orm'
+import { eq, inArray, isNull, not, or } from 'drizzle-orm'
 import db from '~/lib/server/db'
 import { permissionTable, rolePermissionTable, roleTable } from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
@@ -191,14 +191,24 @@ export default class MachineToCRUD {
         .where(eq(rolePermissionTable.roleId, roleId))
         .innerJoin(permissionTable, eq(rolePermissionTable.permissionId, permissionTable.id))
       const missingPermissions = await db
-        .select({
+        .selectDistinct({
           id: permissionTable.id,
           path: permissionTable.path,
           type: permissionTable.type,
         })
         .from(permissionTable)
         .leftJoin(rolePermissionTable, eq(rolePermissionTable.permissionId, permissionTable.id))
-        .where(or(ne(rolePermissionTable.roleId, roleId), isNull(rolePermissionTable.roleId)))
+        .where(
+          or(
+            not(
+              inArray(
+                rolePermissionTable.permissionId,
+                permissions.map((r: any) => r.id),
+              ),
+            ),
+            isNull(rolePermissionTable.roleId),
+          ),
+        )
       this.roleAndPermissions = { ...role[0], permissions, missingPermissions }
     } catch (err: any) {
       rollbar.error('Error en DB. Obtener un rol con sus permisos.', err)

@@ -125,7 +125,7 @@
     --np-filled-button-container-height="32px"
     onclick={() => (isAdding = true)}
   >
-    Agregar
+    Vincular a permiso
   </Button>
 </section>
 <hr
