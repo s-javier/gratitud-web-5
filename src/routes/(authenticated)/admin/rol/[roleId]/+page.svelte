@@ -103,6 +103,18 @@
       template: (type: string) => (type ? (type === 'api' ? 'API' : 'Vista') : ''),
     },
     {
+      id: 'sort',
+      header: 'Orden',
+      width: 70,
+      sort: true,
+    },
+    {
+      id: 'menupageTitle',
+      header: 'Menú',
+      width: 150,
+      sort: true,
+    },
+    {
       id: 'menu',
       header: '',
       width: 60,
@@ -202,7 +214,19 @@
       <ActionMenu
         options={[
           {
-            id: 'delete',
+            id: 'edit-menu',
+            text: 'Editar menú',
+            icon: 'wxi wxi-edit',
+            css: 'text-green-600 force-text-inherit',
+          },
+          {
+            id: 'delete-menu',
+            text: 'Eliminar menú',
+            icon: 'wxi wxi-delete',
+            css: 'text-red-500 force-text-inherit',
+          },
+          {
+            id: 'delete-relation',
             text: 'Eliminar relación',
             icon: 'wxi wxi-delete',
             css: 'text-red-500 force-text-inherit',

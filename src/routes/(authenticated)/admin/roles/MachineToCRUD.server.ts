@@ -1,13 +1,20 @@
 import * as v from 'valibot'
 import { eq, inArray, isNull, not, or } from 'drizzle-orm'
 import db from '~/lib/server/db'
-import { permissionTable, rolePermissionTable, roleTable } from '~/lib/server/db/schema'
+import {
+  menupageTable,
+  permissionTable,
+  rolePermissionTable,
+  roleTable,
+} from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
 
 export default class MachineToCRUD {
   roleId: string
   title: string
   isConfirmed: boolean
+  permissionId: string
+  pathToRedirect: string
   error: {
     roleId?: string
     title?: string
@@ -35,6 +42,7 @@ export default class MachineToCRUD {
   constructor()
   constructor(input: { roleId: string; title: string })
   constructor(input: { isConfirmed: boolean; roleId: string })
+  constructor(input: { roleId: string; permissionId: string; pathToRedirect: string })
 
   constructor(
     input: {
@@ -42,11 +50,15 @@ export default class MachineToCRUD {
       title?: string
       status?: boolean
       isConfirmed?: boolean
+      permissionId?: string
+      pathToRedirect?: string
     } = {},
   ) {
     this.roleId = input.roleId ?? ''
     this.title = input.title ?? ''
     this.isConfirmed = input.isConfirmed ?? false
+    this.permissionId = input.permissionId ?? ''
+    this.pathToRedirect = input.pathToRedirect ?? ''
   }
 
   hasError() {
@@ -100,6 +112,10 @@ export default class MachineToCRUD {
     this.validateForm()
   }
 
+  validateFormToCreateRelationWithPermission() {
+    this.validateForm()
+  }
+
   validateFormToUpdate() {
     this.validateRoleId()
     this.validateTitle()
@@ -117,6 +133,23 @@ export default class MachineToCRUD {
       await db.insert(roleTable).values({ title: this.title })
     } catch (err: any) {
       rollbar.error('Error en DB. Creación de rol.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async createRelationWithPermission(input: {
+    roleId: string
+    permissionId: string
+    sort?: number
+  }) {
+    try {
+      await db.insert(rolePermissionTable).values({
+        roleId: input.roleId,
+        permissionId: input.permissionId,
+        sort: input.sort ?? null,
+      })
+    } catch (err: any) {
+      rollbar.error('Error en DB. Creación de relación de rol con permiso.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }
@@ -186,10 +219,14 @@ export default class MachineToCRUD {
           path: permissionTable.path,
           type: permissionTable.type,
           rolePermissionId: rolePermissionTable.id,
+          sort: rolePermissionTable.sort,
+          menupageId: menupageTable.id,
+          menupageTitle: menupageTable.title,
         })
         .from(rolePermissionTable)
         .where(eq(rolePermissionTable.roleId, roleId))
         .innerJoin(permissionTable, eq(rolePermissionTable.permissionId, permissionTable.id))
+        .innerJoin(menupageTable, eq(permissionTable.id, menupageTable.permissionId))
       const missingPermissions = await db
         .selectDistinct({
           id: permissionTable.id,

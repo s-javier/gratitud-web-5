@@ -2,6 +2,7 @@
   import { tick } from 'svelte'
   import { fade } from 'svelte/transition'
   import type { ActionResult } from '@sveltejs/kit'
+  import { page } from '$app/state'
   import { applyAction, enhance } from '$app/forms'
   import { Button } from 'noph-ui'
   import { Label } from 'flowbite-svelte'
@@ -67,32 +68,33 @@
       id="role-relation-with-permission"
       class="space-y-4"
       method="POST"
-      action="?/add"
+      action="?/add-relation-role-permission"
       use:enhance={() => {
-        toast.removeAll()
-        overlayLoader.is = true
-        return async ({ result }: { result: ActionResult }) => {
-          const sort = props.table.getState().sort
-          const filter = props.table.getState().filter
-          await applyAction(result)
-          overlayLoader.is = false
-          if ('data' in result && result.data?.error) {
-            if (result.data?.error?.permissionId) {
-              permissionIdErr = result.data.error.permissionId
-              toast.error('Por favor, corrige el formulario.', { closable: true })
-            }
-            if (result.data?.error?.server) {
-              toast.error(result.data.error.server, { closable: true, infinite: true })
-            }
-            return
-          }
-          isOpen = false
-          refreshTable(props.table, sort, filter, props.search, props.rows)
-        }
+        // toast.removeAll()
+        // overlayLoader.is = true
+        // return async ({ result }: { result: ActionResult }) => {
+        //   const sort = props.table.getState().sort
+        //   const filter = props.table.getState().filter
+        //   await applyAction(result)
+        //   overlayLoader.is = false
+        //   if ('data' in result && result.data?.error) {
+        //     if (result.data?.error?.permissionId) {
+        //       permissionIdErr = result.data.error.permissionId
+        //       toast.error('Por favor, corrige el formulario.', { closable: true })
+        //     }
+        //     if (result.data?.error?.server) {
+        //       toast.error(result.data.error.server, { closable: true, infinite: true })
+        //     }
+        //     return
+        //   }
+        //   isOpen = false
+        //   refreshTable(props.table, sort, filter, props.search, props.rows)
+        // }
       }}
     >
       <input type="hidden" name="roleId" value={props.id} />
       <input type="hidden" name="permissionId" value={permissionId} />
+      <input type="hidden" name="path" value={page.url.pathname} />
       <Label for="type" class={cn('mb-1 text-base', permissionIdErr && 'text-red-500')}>
         Permiso
       </Label>
