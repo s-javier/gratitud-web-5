@@ -13,6 +13,22 @@
   import Modal from '~/components/Modal.svelte'
   import refreshTable from '~/lib/refresh-table'
 
+  import CheckIcon from '@lucide/svelte/icons/check'
+  import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down'
+  import * as Command from '~/components/ui/command'
+  import * as Popover from '~/components/ui/popover'
+  import { cn } from '~/lib/utils'
+
+  let open = $state(false)
+  let triggerRef = $state<HTMLButtonElement>(null!)
+
+  function closeAndFocusTrigger() {
+    open = false
+    tick().then(() => {
+      triggerRef.focus()
+    })
+  }
+
   let {
     isOpen = $bindable(),
     ...props
@@ -35,15 +51,16 @@
   const missingPermissions = $derived(
     props.permissions.map((permission) => {
       return {
-        name: `${permission.type} - ${permission.path}`,
+        label: `${permission.type === 'view' ? 'Vista' : 'API'} - ${permission.path}`,
         value: permission.id,
       }
     }),
   )
+  const selectedValue = $derived(missingPermissions.find((i) => i.value === permissionId)?.label)
 </script>
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
-  <Modal title="Nuevaj relación con permiso" close={() => (isOpen = false)}>
+  <Modal title="Nueva relación con permiso" close={() => (isOpen = false)}>
     <form
       id="permission"
       class="space-y-4"
@@ -73,8 +90,12 @@
       }}
     >
       <input type="hidden" name="roleId" value={props.id} />
-      <section><b>Rol</b>: {props.title}.</section>
-      <section>
+      <input type="hidden" name="roleId" value={permissionId} />
+      <p><b>Rol</b>: {props.title}.</p>
+      <Label for="type" class={cn('mb-1 text-base', permissionIdErr && 'text-red-500')}>
+        Permiso
+      </Label>
+      <!-- <section>
         <Label for="type" class="mb-1 text-base" color={permissionIdErr ? 'red' : 'gray'}>
           Permiso
         </Label>
@@ -96,7 +117,75 @@
             {permissionIdErr}
           </p>
         {/if}
-      </section>
+      </section> -->
+      <Popover.Root bind:open>
+        <Popover.Trigger bind:ref={triggerRef}>
+          {#snippet child({ props })}
+            <div
+              {...props}
+              class={cn(
+                'mb-0 flex min-h-12.5 items-center justify-between',
+                'rounded-lg border-1 border-gray-300 py-3 pr-3 pl-4',
+                open && 'border-(--o-input-border-focus-color)',
+                permissionIdErr && 'border-red-500',
+              )}
+              aria-expanded={open}
+            >
+              <div>
+                {selectedValue || ''}
+              </div>
+              <div class="flex items-center gap-x-2">
+                {#if permissionId !== ''}
+                  <button
+                    type="button"
+                    class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
+                    onclick={(e) => {
+                      e.stopPropagation()
+                      permissionId = ''
+                      open = false
+                    }}
+                  >
+                    <XMark class="size-5 shrink-0 cursor-pointer" />
+                  </button>
+                {/if}
+                <!-- <ChevronsUpDownIcon class="opacity-50"  /> -->
+              </div>
+            </div>
+          {/snippet}
+        </Popover.Trigger>
+        <Popover.Content class="z-1400 w-full p-0">
+          <Command.Root>
+            <Command.Input
+              placeholder="Buscar permiso..."
+              class="border-none focus:border-none focus:ring-0"
+            />
+            <Command.List>
+              <Command.Empty>Permiso no encontrado.</Command.Empty>
+              <Command.Group>
+                {#each missingPermissions as item}
+                  <Command.Item
+                    value={item.label}
+                    onSelect={() => {
+                      permissionId = item.value
+                      closeAndFocusTrigger()
+                    }}
+                  >
+                    <CheckIcon
+                      class={cn('mr-2 size-4', permissionId !== item.value && 'text-transparent')}
+                    />
+                    {item.label}
+                  </Command.Item>
+                {/each}
+              </Command.Group>
+            </Command.List>
+          </Command.Root>
+        </Popover.Content>
+      </Popover.Root>
+      {#if permissionIdErr}
+        <p in:fade class="mt-1 text-xs text-red-500">
+          {permissionIdErr}
+        </p>
+      {/if}
     </form>
     {#snippet footer()}
       <div class="flex w-full items-center justify-between gap-2">
