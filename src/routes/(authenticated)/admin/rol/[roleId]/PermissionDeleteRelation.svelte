@@ -19,7 +19,9 @@
     search: string
     rows: number
     row: {
-      title: string
+      id: string
+      path: string
+      type: string
       rolePermissionId: string
     } | null
   } = $props()
@@ -40,17 +42,18 @@
 </script>
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
-  <Modal title="Eliminación de relación con rol" close={() => (isOpen = false)}>
+  <Modal title="Eliminación de relación con permiso" close={() => (isOpen = false)}>
     <section class="mb-6">
       <p class="mb-2 text-base leading-relaxed text-gray-500 dark:text-gray-400">
-        ¿Estás seguro de eliminar la relación con el rol <b>{title}</b>?
+        ¿Estás seguro de eliminar la relación con el permiso <b>{props.row?.path}</b>
+        cuyo tipo es <b>{props.row?.type ? (props.row.type === 'view' ? 'vista' : 'API') : ''}</b>?
       </p>
       <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
         Considere que esta acción no se puede deshacer.
       </p>
     </section>
     <form
-      id="permission-delete-relation-role"
+      id="role-delete-relation-permission"
       method="POST"
       action="?/delete"
       use:enhance={() => {
@@ -108,7 +111,7 @@
         </Button>
         <Button
           type="submit"
-          form="permission-delete-relation-role"
+          form="role-delete-relation-permission"
           variant="filled"
           class="text-center! text-base!"
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"

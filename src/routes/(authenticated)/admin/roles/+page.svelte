@@ -49,12 +49,12 @@
   }
 
   const columns = [
-    {
-      id: 'id',
-      header: 'ID',
-      // footer: 'ID',
-      width: 300,
-    },
+    // {
+    //   id: 'id',
+    //   header: 'ID',
+    //   // footer: 'ID',
+    //   width: 300,
+    // },
     {
       id: 'title',
       header: [
@@ -70,6 +70,13 @@
         },
       ],
       sort: true,
+    },
+    {
+      id: 'permissions',
+      header: 'Permisos',
+      width: 100,
+      sort: true,
+      template: (permissions: string[]) => permissions.length,
     },
     {
       id: 'menu',

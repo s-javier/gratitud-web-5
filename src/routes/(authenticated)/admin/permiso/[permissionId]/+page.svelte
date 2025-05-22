@@ -20,7 +20,6 @@
   let table: any = $state()
   let search = $state('')
   let isAdding = $state(false)
-  let isEditing = $state(false)
   let isDeleting = $state(false)
   let row = $state(null)
   let filteredRows = $state(0)
@@ -48,12 +47,12 @@
   }
 
   const columns = [
-    {
-      id: 'id',
-      header: 'ID',
-      // footer: 'ID',
-      width: 300,
-    },
+    // {
+    //   id: 'id',
+    //   header: 'ID',
+    //   // footer: 'ID',
+    //   width: 300,
+    // },
     {
       id: 'title',
       header: [
@@ -196,9 +195,6 @@
         onclick={(event: any) => {
           if (event.action?.id === 'permissions') {
             goto(`${Page.ADMIN_ROLE}/${JSON.parse(event.context).id}`)
-          } else if (event.action?.id === 'edit') {
-            row = JSON.parse(event.context)
-            isEditing = true
           } else if (event.action?.id === 'delete') {
             row = JSON.parse(event.context)
             isDeleting = true

@@ -24,6 +24,7 @@ export default class MachineToCRUD {
     roles: {
       id: string
       title: string
+      rolePermissionId: string
     }[]
   }
 
