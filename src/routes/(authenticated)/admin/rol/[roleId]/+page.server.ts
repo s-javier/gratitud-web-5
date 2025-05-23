@@ -58,4 +58,15 @@ export const actions = {
 
     throw redirect(303, path)
   },
+  'edit-menu': async (event: RequestEvent) => {
+    const formData = await event.request.formData()
+    const permissionId = formData.get('permissionId')?.toString() || ''
+    const menuId = formData.get('menuId')?.toString() || ''
+    const path = formData.get('path')?.toString() || ''
+  },
+  'delete-menu': async (event: RequestEvent) => {
+    const formData = await event.request.formData()
+    const menuId = formData.get('menuId')?.toString() || ''
+    const path = formData.get('path')?.toString() || ''
+  },
 }

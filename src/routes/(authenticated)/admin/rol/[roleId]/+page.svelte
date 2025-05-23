@@ -22,6 +22,7 @@
   let search = $state('')
   let isAdding = $state(false)
   let isDeletingRelation = $state(false)
+  let isEditingMenu = $state(false)
   let row = $state(null)
   let filteredRows = $state(0)
 
