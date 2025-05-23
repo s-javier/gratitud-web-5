@@ -14,11 +14,18 @@ export default class MachineToCRUD {
   title: string
   isConfirmed: boolean
   permissionId: string
+  permissionType: string
+  sort: number
+  rolePermissionId: string
   pathToRedirect: string
   error: {
     roleId?: string
     title?: string
     isConfirmed?: string
+    permissionId?: string
+    permissionType?: string
+    sort?: string
+    pathToRedirect?: string
     server?: string
   } = {}
   roles: any[] = []
@@ -42,7 +49,14 @@ export default class MachineToCRUD {
   constructor()
   constructor(input: { roleId: string; title: string })
   constructor(input: { isConfirmed: boolean; roleId: string })
-  constructor(input: { roleId: string; permissionId: string; pathToRedirect: string })
+  constructor(input: {
+    roleId: string
+    permissionId: string
+    permissionType: string
+    sort: number
+    pathToRedirect: string
+  })
+  constructor(input: { rolePermissionId: string; isConfirmed: boolean; pathToRedirect: string })
 
   constructor(
     input: {
@@ -51,6 +65,9 @@ export default class MachineToCRUD {
       status?: boolean
       isConfirmed?: boolean
       permissionId?: string
+      permissionType?: string
+      sort?: number
+      rolePermissionId?: string
       pathToRedirect?: string
     } = {},
   ) {
@@ -58,6 +75,9 @@ export default class MachineToCRUD {
     this.title = input.title ?? ''
     this.isConfirmed = input.isConfirmed ?? false
     this.permissionId = input.permissionId ?? ''
+    this.permissionType = input.permissionType ?? ''
+    this.sort = input.sort ?? 0
+    this.rolePermissionId = input.rolePermissionId ?? ''
     this.pathToRedirect = input.pathToRedirect ?? ''
   }
 
@@ -65,18 +85,18 @@ export default class MachineToCRUD {
     return Object.keys(this.error).length > 0
   }
 
-  validateRoleId() {
-    const roleIdErr = v.safeParse(
+  validateId(input: { id: string; key: string }) {
+    const idErr = v.safeParse(
       v.pipe(
         v.string('El valor de este campo es inválido.'),
         v.trim(),
         v.nonEmpty('Este campo es requerido.'),
         v.uuid('El valor de este campo es inválido.'),
       ),
-      this.roleId,
+      input.id,
     )
-    if (roleIdErr.issues) {
-      this.error.roleId = roleIdErr.issues[0].message
+    if (idErr.issues) {
+      this.error[input.key as keyof typeof this.error] = idErr.issues[0].message
     }
   }
 
@@ -101,9 +121,46 @@ export default class MachineToCRUD {
     }
   }
 
+  validateType() {
+    if (!this.permissionType) {
+      this.error.permissionType = 'Este campo es requerido.'
+    } else if (this.permissionType !== 'api' && this.permissionType !== 'view') {
+      this.error.permissionType = 'El valor de este campo es inválido.'
+    }
+  }
+
+  validateSort() {
+    const sortErr = v.safeParse(
+      v.pipe(
+        v.number('El valor de este campo es inválido.'),
+        v.minValue(1, 'El valor de este campo debe ser mayor a 0.'),
+        v.maxValue(99, 'El valor de este campo debe ser menor a 100.'),
+      ),
+      this.sort,
+    )
+    if (sortErr.issues) {
+      this.error.sort = sortErr.issues[0].message
+    }
+  }
+
   validateForm() {
     if (Object.keys(this.error).length > 0) {
       throw new Error()
+    }
+  }
+
+  validatePathToRedirect() {
+    const pathToRedirectErr = v.safeParse(
+      v.pipe(
+        v.string('El valor de este campo es inválido.'),
+        v.trim(),
+        v.nonEmpty('Este campo es requerido.'),
+        v.minLength(3, 'Por favor, escribe un poco más.'),
+      ),
+      this.pathToRedirect,
+    )
+    if (pathToRedirectErr.issues) {
+      this.error.pathToRedirect = pathToRedirectErr.issues[0].message
     }
   }
 
@@ -113,17 +170,30 @@ export default class MachineToCRUD {
   }
 
   validateFormToCreateRelationWithPermission() {
+    this.validateId({ id: this.roleId, key: 'roleId' })
+    this.validateType()
+    this.validateId({ id: this.permissionId, key: 'permissionId' })
+    if (this.permissionType === 'view') {
+      this.validateSort()
+    }
+    this.validatePathToRedirect()
     this.validateForm()
   }
 
   validateFormToUpdate() {
-    this.validateRoleId()
+    this.validateId({ id: this.roleId, key: 'roleId' })
     this.validateTitle()
     this.validateForm()
   }
 
   validateFormToDelete() {
-    this.validateRoleId()
+    this.validateId({ id: this.roleId, key: 'roleId' })
+    this.validateIsConfirmed()
+    this.validateForm()
+  }
+
+  validateFormToDeleteRelationRolePermission() {
+    this.validateId({ id: this.rolePermissionId, key: 'rolePermissionId' })
     this.validateIsConfirmed()
     this.validateForm()
   }
@@ -137,16 +207,12 @@ export default class MachineToCRUD {
     }
   }
 
-  async createRelationWithPermission(input: {
-    roleId: string
-    permissionId: string
-    sort?: number
-  }) {
+  async createRelationWithPermission() {
     try {
       await db.insert(rolePermissionTable).values({
-        roleId: input.roleId,
-        permissionId: input.permissionId,
-        sort: input.sort ?? null,
+        roleId: this.roleId,
+        permissionId: this.permissionId,
+        sort: this.permissionType === 'view' ? this.sort : null,
       })
     } catch (err: any) {
       rollbar.error('Error en DB. Creación de relación de rol con permiso.', err)
@@ -226,7 +292,7 @@ export default class MachineToCRUD {
         .from(rolePermissionTable)
         .where(eq(rolePermissionTable.roleId, roleId))
         .innerJoin(permissionTable, eq(rolePermissionTable.permissionId, permissionTable.id))
-        .innerJoin(menupageTable, eq(permissionTable.id, menupageTable.permissionId))
+        .leftJoin(menupageTable, eq(permissionTable.id, menupageTable.permissionId))
       const missingPermissions = await db
         .selectDistinct({
           id: permissionTable.id,
@@ -273,6 +339,15 @@ export default class MachineToCRUD {
       await db.delete(roleTable).where(eq(roleTable.id, this.roleId))
     } catch (err: any) {
       rollbar.error('Error en DB. Eliminación de rol.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async deleteRelationRolePermission() {
+    try {
+      await db.delete(rolePermissionTable).where(eq(rolePermissionTable.id, this.rolePermissionId))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Eliminación de relación de rol con permiso.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }

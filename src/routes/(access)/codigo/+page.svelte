@@ -136,7 +136,7 @@
 
         <Button
           variant="filled"
-          class="w-full text-center! text-base!"
+          class="mb-10 w-full text-center! text-base!"
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
           --np-filled-button-container-height="42px"
           --np-filled-button-container-shape="4px"

@@ -93,7 +93,7 @@
     --np-filled-button-container-height="32px"
     onclick={() => (isAdding = true)}
   >
-    Vincular a rol
+    Vincular con rol
   </Button>
 </section>
 <hr

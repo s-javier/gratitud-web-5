@@ -21,7 +21,7 @@
   let table: any = $state()
   let search = $state('')
   let isAdding = $state(false)
-  let isDeleting = $state(false)
+  let isDeletingRelation = $state(false)
   let row = $state(null)
   let filteredRows = $state(0)
 
@@ -137,7 +137,7 @@
     --np-filled-button-container-height="32px"
     onclick={() => (isAdding = true)}
   >
-    Vincular a permiso
+    Vincular con permiso
   </Button>
 </section>
 <hr
@@ -192,12 +192,12 @@
         {#if search.length > 0}
           <div transition:fade>
             <button
-              class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
+              class="flex size-6 cursor-pointer items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
               onclick={() => {
                 search = ''
               }}
             >
-              <XMark class="size-5 shrink-0 cursor-pointer" />
+              <XMark class="size-5 shrink-0" />
             </button>
           </div>
         {/if}
@@ -238,9 +238,9 @@
         onclick={(event: any) => {
           if (event.action?.id === 'permissions') {
             goto(`${Page.ADMIN_ROLE}/${JSON.parse(event.context).id}`)
-          } else if (event.action?.id === 'delete') {
+          } else if (event.action?.id === 'delete-relation') {
             row = JSON.parse(event.context)
-            isDeleting = true
+            isDeletingRelation = true
           } else {
             row = null
           }
@@ -263,7 +263,7 @@
 </div>
 
 <PermissionDeleteRelation
-  bind:isOpen={isDeleting}
+  bind:isOpen={isDeletingRelation}
   {table}
   {search}
   rows={data?.roleAndPermissions?.permissions?.length ?? 0}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade } from 'svelte/transition'
   import type { ActionResult } from '@sveltejs/kit'
+  import { page } from '$app/state'
   import { applyAction, enhance } from '$app/forms'
   import { Button } from 'noph-ui'
   import { Checkbox } from 'flowbite-svelte'
@@ -52,7 +53,7 @@
     <form
       id="permission-delete-relation-role"
       method="POST"
-      action="?/delete"
+      action="?/delete-relation-role-permission"
       use:enhance={() => {
         toast.removeAll()
         overlayLoader.is = true
@@ -80,8 +81,9 @@
         }
       }}
     >
-      <input type="hidden" name="roleId" value={props.row?.rolePermissionId} />
-      <div class="rounded-sm border {isConfirmedErr ? 'border-red-400' : 'border-gray-300'}">
+      <input type="hidden" name="rolePermissionId" value={props.row?.rolePermissionId} />
+      <input type="hidden" name="path" value={page.url.pathname} />
+      <section class="rounded-sm border {isConfirmedErr ? 'border-red-400' : 'border-gray-300'}">
         <Checkbox
           name="isConfirmed"
           bind:checked={isConfirmed}
@@ -91,7 +93,7 @@
         >
           Confirmo que deseo eliminar la relación.
         </Checkbox>
-      </div>
+      </section>
       {#if isConfirmedErr}
         <p in:fade class="text-sm text-red-500">{isConfirmedErr}</p>
       {/if}
