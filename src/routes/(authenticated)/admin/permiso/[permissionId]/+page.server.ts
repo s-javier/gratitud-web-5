@@ -1,7 +1,7 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import { Page } from '~/enums'
-import MachineToCRUDFromPermission from '~/routes/(authenticated)/admin/permisos/MachineToCRUD.server'
-import MachineToCRUDFromRole from '~/routes/(authenticated)/admin/roles/MachineToCRUD.server'
+import MachineToCRUDFromPermission from '~/routes/(authenticated)/admin/permisos/Permission.server'
+import MachineToCRUDFromRole from '~/routes/(authenticated)/admin/roles/Role.server'
 
 export async function load(event: RequestEvent) {
   const machine = new MachineToCRUDFromPermission()

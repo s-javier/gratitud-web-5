@@ -1,9 +1,8 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
-import { Page } from '~/enums'
-import MachineToCRUD from '~/routes/(authenticated)/admin/roles/MachineToCRUD.server'
+import Role from '~/routes/(authenticated)/admin/roles/Role.server'
 
 export async function load(event: RequestEvent) {
-  const machine = new MachineToCRUD()
+  const machine = new Role()
   try {
     await machine.readOneByIdWithPermissions(event.params.roleId || '')
   } catch {}
@@ -22,7 +21,7 @@ export const actions = {
     const sort = parseInt(formData.get('sort')?.toString() || '0')
     const path = formData.get('path')?.toString() || ''
 
-    const machine = new MachineToCRUD({
+    const machine = new Role({
       roleId,
       permissionId,
       sort,
@@ -46,7 +45,7 @@ export const actions = {
     const path = formData.get('path')?.toString() || ''
     const isConfirmed = formData.get('isConfirmed')?.toString() === 'true' || false
 
-    const machine = new MachineToCRUD({ rolePermissionId, pathToRedirect: path, isConfirmed })
+    const machine = new Role({ rolePermissionId, pathToRedirect: path, isConfirmed })
     try {
       machine.validateFormToDeleteRelationRolePermission()
       await machine.deleteRelationRolePermission()
@@ -61,7 +60,8 @@ export const actions = {
   'edit-menu': async (event: RequestEvent) => {
     const formData = await event.request.formData()
     const permissionId = formData.get('permissionId')?.toString() || ''
-    const menuId = formData.get('menuId')?.toString() || ''
+    const menupageId = formData.get('menupageId')?.toString() || ''
+    const menupageTitle = formData.get('menupageTitle')?.toString() || ''
     const path = formData.get('path')?.toString() || ''
   },
   'delete-menu': async (event: RequestEvent) => {

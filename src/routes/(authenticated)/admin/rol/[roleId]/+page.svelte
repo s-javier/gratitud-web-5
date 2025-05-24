@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, type SvelteComponent } from 'svelte'
   import { fade } from 'svelte/transition'
-  import { goto } from '$app/navigation'
   import { toast } from 'svoast'
   // @ts-ignore
   import { Grid } from 'wx-svelte-grid'
@@ -15,6 +14,7 @@
   import { Page } from '~/enums'
   import PermissionDeleteRelation from './PermissionDeleteRelation.svelte'
   import RoleAddPermission from './RoleAddPermission.svelte'
+  import MenuEdit from './MenuEdit.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -237,8 +237,9 @@
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {
-          if (event.action?.id === 'permissions') {
-            goto(`${Page.ADMIN_ROLE}/${JSON.parse(event.context).id}`)
+          if (event.action?.id === 'edit-menu') {
+            row = JSON.parse(event.context)
+            isEditingMenu = true
           } else if (event.action?.id === 'delete-relation') {
             row = JSON.parse(event.context)
             isDeletingRelation = true
@@ -278,4 +279,11 @@
   id={data?.roleAndPermissions?.id}
   title={data?.roleAndPermissions?.title}
   permissions={data?.roleAndPermissions?.missingPermissions}
+/>
+<MenuEdit
+  bind:isOpen={isEditingMenu}
+  {table}
+  {search}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  {row}
 />

@@ -1,9 +1,9 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import { Page } from '~/enums'
-import MachineToCRUD from './MachineToCRUD.server'
+import Role from './Role.server'
 
 export async function load(event: RequestEvent) {
-  const machine = new MachineToCRUD()
+  const machine = new Role()
   try {
     await machine.readAllWithPermissions()
   } catch {}
@@ -18,7 +18,7 @@ export const actions = {
     const formData = await event.request.formData()
     const title = formData.get('title')?.toString() || ''
 
-    const machine = new MachineToCRUD({ title })
+    const machine = new Role({ title })
     try {
       machine.validateFormToCreate()
       await machine.create()
@@ -36,7 +36,7 @@ export const actions = {
     const roleId = formData.get('roleId')?.toString() || ''
     const title = formData.get('title')?.toString() || ''
 
-    const machine = new MachineToCRUD({ roleId, title })
+    const machine = new Role({ roleId, title })
     try {
       machine.validateFormToUpdate()
       await machine.update()
@@ -54,7 +54,7 @@ export const actions = {
     const roleId = formData.get('roleId')?.toString() || ''
     const isConfirmed = formData.get('isConfirmed')?.toString() === 'true' || false
 
-    const machine = new MachineToCRUD({ isConfirmed, roleId })
+    const machine = new Role({ isConfirmed, roleId })
     try {
       machine.validateFormToDelete()
       await machine.delete()

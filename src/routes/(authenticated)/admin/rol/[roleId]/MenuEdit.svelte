@@ -2,6 +2,7 @@
   import { tick } from 'svelte'
   import { fade } from 'svelte/transition'
   import type { ActionResult } from '@sveltejs/kit'
+  import { page } from '$app/state'
   import { applyAction, enhance } from '$app/forms'
   import { Button } from 'noph-ui'
   import { ExclamationCircleSolid } from 'flowbite-svelte-icons'
@@ -21,16 +22,22 @@
     table: any
     search: string
     rows: number
-    /* ↓ Permiso. */
     row?: {
       id: string
-      path: string
-      type: string
+      /* ↓ menupage. */
+      menupageId: string
+      menupageTitle: string
     } | null
   } = $props()
   let title = $state('')
   let titleErr = $state('')
   let titleRef = $state() as HTMLInputElement
+
+  $effect(() => {
+    if (props.row) {
+      title = props.row.menupageTitle
+    }
+  })
 
   $effect(() => {
     if (isOpen) {
@@ -68,10 +75,20 @@
         }
       }}
     >
-      <input type="hidden" name="roleId" value={props.row?.id} />
+      <input type="hidden" name="permissionId" value={props.row?.id || ''} />
+      <input type="hidden" name="menupageId" value={props.row?.menupageId || ''} />
+      <input type="hidden" name="path" value={page.url.pathname} />
       <section>
-        <Label for="title" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>Título</Label>
-        <Input type="text" id="title" name="title" size="lg" color={titleErr ? 'red' : 'default'}>
+        <Label for="title" class="mb-1 text-base" color={titleErr ? 'red' : 'gray'}>
+          Título de menú
+        </Label>
+        <Input
+          type="text"
+          id="title"
+          name="menupageTitle"
+          size="lg"
+          color={titleErr ? 'red' : 'default'}
+        >
           {#snippet children(props)}
             <input
               {...props}

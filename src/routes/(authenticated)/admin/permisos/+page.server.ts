@@ -1,6 +1,6 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import { Page } from '~/enums'
-import MachineToCRUD from './MachineToCRUD.server'
+import MachineToCRUD from './Permission.server'
 
 export async function load() {
   const machine = new MachineToCRUD()
