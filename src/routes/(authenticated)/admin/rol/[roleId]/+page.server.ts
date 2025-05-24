@@ -1,5 +1,6 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import Role from '~/routes/(authenticated)/admin/roles/Role.server'
+import Permission from '~/routes/(authenticated)/admin/permisos/Permission.server'
 
 export async function load(event: RequestEvent) {
   const machine = new Role()
@@ -63,10 +64,48 @@ export const actions = {
     const menupageId = formData.get('menupageId')?.toString() || ''
     const menupageTitle = formData.get('menupageTitle')?.toString() || ''
     const path = formData.get('path')?.toString() || ''
+
+    const machine = new Permission({
+      permissionId,
+      menupageId,
+      menupageTitle,
+      pathToRedirect: path,
+    })
+    try {
+      machine.validateFormToUpdateMenupage()
+      if (menupageId) {
+        await machine.updateMenupage()
+      } else {
+        await machine.createMenupage()
+      }
+    } catch {}
+
+    if (machine.hasError()) {
+      return { error: machine.error }
+    }
+
+    throw redirect(303, path)
   },
   'delete-menu': async (event: RequestEvent) => {
     const formData = await event.request.formData()
-    const menuId = formData.get('menuId')?.toString() || ''
+    const menupageId = formData.get('menupageId')?.toString() || ''
+    const isConfirmed = formData.get('isConfirmed')?.toString() === 'true' || false
     const path = formData.get('path')?.toString() || ''
+
+    if (!menupageId) {
+      return { error: { server: 'No puedes eliminar un menú que no existe.' } }
+    }
+
+    const machine = new Permission({ isConfirmed, menupageId, pathToRedirect: path })
+    try {
+      machine.validateFormToDeleteMenupage()
+      await machine.deleteMenupage()
+    } catch {}
+
+    if (machine.hasError()) {
+      return { error: machine.error }
+    }
+
+    throw redirect(303, path)
   },
 }

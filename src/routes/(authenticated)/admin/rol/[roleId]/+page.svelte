@@ -14,7 +14,8 @@
   import { Page } from '~/enums'
   import PermissionDeleteRelation from './PermissionDeleteRelation.svelte'
   import RoleAddPermission from './RoleAddPermission.svelte'
-  import MenuEdit from './MenuEdit.svelte'
+  import MenupageEdit from './MenupageEdit.svelte'
+  import MenupageDelete from './MenupageDelete.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -22,7 +23,8 @@
   let search = $state('')
   let isAdding = $state(false)
   let isDeletingRelation = $state(false)
-  let isEditingMenu = $state(false)
+  let isEditingMenupage = $state(false)
+  let isDeletingMenupage = $state(false)
   let row = $state(null)
   let filteredRows = $state(0)
 
@@ -215,13 +217,13 @@
       <ActionMenu
         options={[
           {
-            id: 'edit-menu',
+            id: 'edit-menupage',
             text: 'Editar menú',
             icon: 'wxi wxi-edit',
             css: 'text-green-600 force-text-inherit',
           },
           {
-            id: 'delete-menu',
+            id: 'delete-menupage',
             text: 'Eliminar menú',
             icon: 'wxi wxi-delete',
             css: 'text-red-500 force-text-inherit',
@@ -237,9 +239,12 @@
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {
-          if (event.action?.id === 'edit-menu') {
+          if (event.action?.id === 'edit-menupage') {
             row = JSON.parse(event.context)
-            isEditingMenu = true
+            isEditingMenupage = true
+          } else if (event.action?.id === 'delete-menupage') {
+            row = JSON.parse(event.context)
+            isDeletingMenupage = true
           } else if (event.action?.id === 'delete-relation') {
             row = JSON.parse(event.context)
             isDeletingRelation = true
@@ -280,8 +285,15 @@
   title={data?.roleAndPermissions?.title}
   permissions={data?.roleAndPermissions?.missingPermissions}
 />
-<MenuEdit
-  bind:isOpen={isEditingMenu}
+<MenupageEdit
+  bind:isOpen={isEditingMenupage}
+  {table}
+  {search}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  {row}
+/>
+<MenupageDelete
+  bind:isOpen={isDeletingMenupage}
   {table}
   {search}
   rows={data?.roleAndPermissions?.permissions?.length ?? 0}

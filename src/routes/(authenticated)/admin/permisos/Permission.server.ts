@@ -1,7 +1,12 @@
 import * as v from 'valibot'
 import { eq, inArray, isNull, not, or } from 'drizzle-orm'
 import db from '~/lib/server/db'
-import { permissionTable, rolePermissionTable, roleTable } from '~/lib/server/db/schema'
+import {
+  menupageTable,
+  permissionTable,
+  rolePermissionTable,
+  roleTable,
+} from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
 
 export default class MachineToCRUD {
@@ -9,11 +14,17 @@ export default class MachineToCRUD {
   path: string
   type: string
   isConfirmed: boolean
+  menupageId: string
+  menupageTitle: string
+  pathToRedirect: string
   error: {
     permissionId?: string
     path?: string
     type?: string
     isConfirmed?: string
+    menupageId?: string
+    menupageTitle?: string
+    pathToRedirect?: string
     server?: string
   } = {}
   permissions: any[] = []
@@ -36,6 +47,13 @@ export default class MachineToCRUD {
   constructor()
   constructor(input: { permissionId: string; path: string; type: string })
   constructor(input: { isConfirmed: boolean; permissionId: string })
+  constructor(input: {
+    permissionId: string
+    menupageId: string
+    menupageTitle: string
+    pathToRedirect: string
+  })
+  constructor(input: { isConfirmed: boolean; menupageId: string; pathToRedirect: string })
 
   constructor(
     input: {
@@ -43,30 +61,36 @@ export default class MachineToCRUD {
       path?: string
       type?: string
       isConfirmed?: boolean
+      menupageId?: string
+      menupageTitle?: string
+      pathToRedirect?: string
     } = {},
   ) {
     this.permissionId = input.permissionId ?? ''
     this.path = input.path ?? ''
     this.type = input.type ?? ''
     this.isConfirmed = input.isConfirmed ?? false
+    this.menupageId = input.menupageId ?? ''
+    this.menupageTitle = input.menupageTitle ?? ''
+    this.pathToRedirect = input.pathToRedirect ?? ''
   }
 
   hasError() {
     return Object.keys(this.error).length > 0
   }
 
-  validatePermissionId() {
-    const permissionIdErr = v.safeParse(
+  validateId(input: { id: string; key: string }) {
+    const idErr = v.safeParse(
       v.pipe(
         v.string('El valor de este campo es inválido.'),
         v.trim(),
         v.nonEmpty('Este campo es requerido.'),
         v.uuid('El valor de este campo es inválido.'),
       ),
-      this.permissionId,
+      input.id,
     )
-    if (permissionIdErr.issues) {
-      this.error.permissionId = permissionIdErr.issues[0].message
+    if (idErr.issues) {
+      this.error[input.key as keyof typeof this.error] = idErr.issues[0].message
     }
   }
 
@@ -99,6 +123,36 @@ export default class MachineToCRUD {
     }
   }
 
+  validateMenupageTitle() {
+    const titleErr = v.safeParse(
+      v.pipe(
+        v.string('El valor de este campo es inválido.'),
+        v.trim(),
+        v.nonEmpty('Este campo es requerido.'),
+        v.minLength(2, 'Por favor, escribe un poco más.'),
+      ),
+      this.menupageTitle,
+    )
+    if (titleErr.issues) {
+      this.error.menupageTitle = titleErr.issues[0].message
+    }
+  }
+
+  validatePathToRedirect() {
+    const pathToRedirectErr = v.safeParse(
+      v.pipe(
+        v.string('El valor de este campo es inválido.'),
+        v.trim(),
+        v.nonEmpty('Este campo es requerido.'),
+        v.minLength(3, 'Por favor, escribe un poco más.'),
+      ),
+      this.pathToRedirect,
+    )
+    if (pathToRedirectErr.issues) {
+      this.error.pathToRedirect = pathToRedirectErr.issues[0].message
+    }
+  }
+
   validateForm() {
     if (Object.keys(this.error).length > 0) {
       throw new Error()
@@ -112,15 +166,31 @@ export default class MachineToCRUD {
   }
 
   validateFormToUpdate() {
-    this.validatePermissionId()
+    this.validateId({ id: this.permissionId, key: 'permissionId' })
     this.validatePath()
     this.validateType()
     this.validateForm()
   }
 
   validateFormToDelete() {
-    this.validatePermissionId()
+    this.validateId({ id: this.permissionId, key: 'permissionId' })
     this.validateIsConfirmed()
+    this.validateForm()
+  }
+
+  validateFormToUpdateMenupage() {
+    this.validateId({ id: this.permissionId, key: 'permissionId' })
+    if (this.menupageId) {
+      this.validateId({ id: this.menupageId, key: 'menupageId' })
+    }
+    this.validateMenupageTitle()
+    this.validatePathToRedirect()
+    this.validateForm()
+  }
+
+  validateFormToDeleteMenupage() {
+    this.validateIsConfirmed()
+    this.validateId({ id: this.menupageId, key: 'menupageId' })
     this.validateForm()
   }
 
@@ -129,6 +199,35 @@ export default class MachineToCRUD {
       await db.insert(permissionTable).values({ path: this.path, type: this.type })
     } catch (err: any) {
       rollbar.error('Error en DB. Creación de permiso.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async createMenupage() {
+    let query
+    try {
+      query = await db
+        .select({
+          menupageId: menupageTable.id,
+        })
+        .from(menupageTable)
+        .where(eq(menupageTable.permissionId, this.permissionId))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Consulta de menupage por permissionId.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+      return
+    }
+    if (query.length > 0) {
+      this.error.server =
+        'Hubo un error al editar el menú. Por favor, inténtalo de nuevo o más tarde.'
+      return
+    }
+    try {
+      await db
+        .insert(menupageTable)
+        .values({ permissionId: this.permissionId, title: this.menupageTitle })
+    } catch (err: any) {
+      rollbar.error('Error en DB. Creación de menupage.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }
@@ -246,11 +345,34 @@ export default class MachineToCRUD {
     }
   }
 
+  async updateMenupage() {
+    try {
+      await db
+        .update(menupageTable)
+        .set({
+          title: this.menupageTitle,
+        })
+        .where(eq(menupageTable.id, this.menupageId))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Actualización de menupage.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
   async delete() {
     try {
       await db.delete(permissionTable).where(eq(permissionTable.id, this.permissionId))
     } catch (err: any) {
       rollbar.error('Error en DB. Eliminación de permiso.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async deleteMenupage() {
+    try {
+      await db.delete(menupageTable).where(eq(menupageTable.id, this.menupageId))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Eliminación de menupage.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }

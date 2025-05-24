@@ -24,6 +24,8 @@
     rows: number
     row?: {
       id: string
+      path: string
+      type: string
       /* ↓ menupage. */
       menupageId: string
       menupageTitle: string
@@ -35,7 +37,7 @@
 
   $effect(() => {
     if (props.row) {
-      title = props.row.menupageTitle
+      title = props.row.menupageTitle ?? ''
     }
   })
 
@@ -48,6 +50,10 @@
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
   <Modal title="Edición de menú" close={() => (isOpen = false)}>
+    <section class="mb-4">
+      <p><b>Ruta</b>: {props.row?.path}.</p>
+      <p><b>Tipo</b>: {props.row?.type ? (props.row?.type === 'view' ? 'vista' : 'API') : ''}.</p>
+    </section>
     <form
       id="edit-menu"
       method="POST"
@@ -61,9 +67,17 @@
           await applyAction(result)
           overlayLoader.is = false
           if ('data' in result && result.data?.error) {
-            if (result.data?.error?.title) {
-              titleErr = result.data.error.title
+            if (result.data?.error?.menupageTitle) {
+              titleErr = result.data.error.menupageTitle
               toast.error('Por favor, corrige el error.', { closable: true })
+            } else if (
+              result.data.error.permissionId ||
+              result.data.error.menupageId ||
+              result.data.error.pathToRedirect
+            ) {
+              toast.error('Hubo un error. Por favor, recarga la página para corregirlo.', {
+                closable: true,
+              })
             }
             if (result.data?.error?.server) {
               toast.error(result.data.error.server, { closable: true, infinite: true })

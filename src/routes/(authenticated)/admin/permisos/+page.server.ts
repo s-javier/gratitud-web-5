@@ -1,9 +1,9 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import { Page } from '~/enums'
-import MachineToCRUD from './Permission.server'
+import Permission from './Permission.server'
 
 export async function load() {
-  const machine = new MachineToCRUD()
+  const machine = new Permission()
   try {
     await machine.readAllWithRoles()
   } catch {}
@@ -19,7 +19,7 @@ export const actions = {
     const path = formData.get('path')?.toString() || ''
     const type = formData.get('type')?.toString() || ''
 
-    const machine = new MachineToCRUD({ path, type })
+    const machine = new Permission({ path, type })
     try {
       machine.validateFormToCreate()
       await machine.create()
@@ -38,7 +38,7 @@ export const actions = {
     const path = formData.get('path')?.toString() || ''
     const type = formData.get('type')?.toString() || ''
 
-    const machine = new MachineToCRUD({ permissionId, path, type })
+    const machine = new Permission({ permissionId, path, type })
     try {
       machine.validateFormToUpdate()
       await machine.update()
@@ -56,7 +56,7 @@ export const actions = {
     const permissionId = formData.get('permissionId')?.toString() || ''
     const isConfirmed = formData.get('isConfirmed')?.toString() === 'true' || false
 
-    const machine = new MachineToCRUD({ isConfirmed, permissionId })
+    const machine = new Permission({ isConfirmed, permissionId })
     try {
       machine.validateFormToDelete()
       await machine.delete()
