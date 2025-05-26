@@ -49,8 +49,8 @@
   let permissionId = $state('')
   let permissionType = $state('')
   let permissionIdErr = $state('')
-  let sort = $state(0)
-  let sortErr = $state('')
+  let order = $state(0)
+  let orderErr = $state('')
 
   const missingPermissions = $derived(
     props.permissions.map((permission) => {
@@ -62,6 +62,9 @@
     }),
   )
   const selectedValue = $derived(missingPermissions.find((i) => i.value === permissionId)?.label)
+  const position = $derived(
+    permissionType === 'view' ? 'justify-start items-end' : 'justify-center items-center',
+  )
 
   $effect(() => {
     if (open) {
@@ -70,7 +73,7 @@
   })
 </script>
 
-<Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
+<Overlay type="dialog" isActive={isOpen} width="max-w-[500px]" {position}>
   <Modal title="Nueva relación con permiso" close={() => (isOpen = false)}>
     <section class="mb-4">
       <p><b>Rol</b>: {props.title}.</p>
@@ -92,10 +95,10 @@
             if (result.data.error.permissionId) {
               permissionIdErr = result.data.error.permissionId
             }
-            if (result.data.error.sort) {
-              sortErr = result.data.error.sort
+            if (result.data.error.order) {
+              orderErr = result.data.error.order
             }
-            if (result.data.error.permissionId || result.data.error.sort) {
+            if (result.data.error.permissionId || result.data.error.order) {
               toast.error('Por favor, corrige el formulario.', { closable: true })
             } else if (result.data.error.permissionType || result.data.error.pathToRedirect) {
               toast.error('Hubo un error. Por favor, recarga la página para corregirlo.', {
@@ -193,31 +196,37 @@
       </section>
       {#if permissionType === 'view'}
         <section in:fade>
-          <Label for="sort" class="mb-1 text-base" color={sortErr ? 'red' : 'gray'}>Orden</Label>
-          <Input type="number" id="sort" name="sort" size="lg" color={sortErr ? 'red' : 'default'}>
+          <Label for="order" class="mb-1 text-base" color={orderErr ? 'red' : 'gray'}>Orden</Label>
+          <Input
+            type="number"
+            id="order"
+            name="order"
+            size="lg"
+            color={orderErr ? 'red' : 'default'}
+          >
             {#snippet children(props)}
               <input
                 {...props}
-                bind:value={sort}
+                bind:value={order}
                 class={cn(
                   props.class,
                   'bg-white ring-(--o-input-border-focus-color)',
-                  sortErr && 'pr-10',
+                  orderErr && 'pr-10',
                 )}
                 onfocus={() => {
-                  sortErr = ''
+                  orderErr = ''
                 }}
               />
             {/snippet}
             {#snippet right()}
-              {#if sortErr}
+              {#if orderErr}
                 <ExclamationCircleSolid class="size-6 text-red-400" />
               {/if}
             {/snippet}
           </Input>
-          {#if sortErr}
+          {#if orderErr}
             <p in:fade class="mt-1 text-xs text-red-500">
-              {sortErr}
+              {orderErr}
             </p>
           {/if}
         </section>

@@ -15,7 +15,7 @@ export default class MachineToCRUD {
   isConfirmed: boolean
   permissionId: string
   permissionType: string
-  sort: number
+  order: number
   rolePermissionId: string
   pathToRedirect: string
   error: {
@@ -24,7 +24,7 @@ export default class MachineToCRUD {
     isConfirmed?: string
     permissionId?: string
     permissionType?: string
-    sort?: string
+    order?: string
     pathToRedirect?: string
     server?: string
   } = {}
@@ -53,10 +53,11 @@ export default class MachineToCRUD {
     roleId: string
     permissionId: string
     permissionType: string
-    sort: number
+    order: number
     pathToRedirect: string
   })
   constructor(input: { rolePermissionId: string; isConfirmed: boolean; pathToRedirect: string })
+  constructor(input: { rolePermissionId: string; order: number; pathToRedirect: string })
 
   constructor(
     input: {
@@ -66,7 +67,7 @@ export default class MachineToCRUD {
       isConfirmed?: boolean
       permissionId?: string
       permissionType?: string
-      sort?: number
+      order?: number
       rolePermissionId?: string
       pathToRedirect?: string
     } = {},
@@ -76,7 +77,7 @@ export default class MachineToCRUD {
     this.isConfirmed = input.isConfirmed ?? false
     this.permissionId = input.permissionId ?? ''
     this.permissionType = input.permissionType ?? ''
-    this.sort = input.sort ?? 0
+    this.order = input.order ?? 0
     this.rolePermissionId = input.rolePermissionId ?? ''
     this.pathToRedirect = input.pathToRedirect ?? ''
   }
@@ -129,17 +130,17 @@ export default class MachineToCRUD {
     }
   }
 
-  validateSort() {
-    const sortErr = v.safeParse(
+  validateOrder() {
+    const orderErr = v.safeParse(
       v.pipe(
         v.number('El valor de este campo es inválido.'),
         v.minValue(1, 'El valor de este campo debe ser mayor a 0.'),
         v.maxValue(99, 'El valor de este campo debe ser menor a 100.'),
       ),
-      this.sort,
+      this.order,
     )
-    if (sortErr.issues) {
-      this.error.sort = sortErr.issues[0].message
+    if (orderErr.issues) {
+      this.error.order = orderErr.issues[0].message
     }
   }
 
@@ -174,7 +175,7 @@ export default class MachineToCRUD {
     this.validateType()
     this.validateId({ id: this.permissionId, key: 'permissionId' })
     if (this.permissionType === 'view') {
-      this.validateSort()
+      this.validateOrder()
     }
     this.validatePathToRedirect()
     this.validateForm()
@@ -198,6 +199,13 @@ export default class MachineToCRUD {
     this.validateForm()
   }
 
+  validateFormToUpdateRolePermissionOrder() {
+    this.validateId({ id: this.rolePermissionId, key: 'rolePermissionId' })
+    this.validateOrder()
+    this.validatePathToRedirect()
+    this.validateForm()
+  }
+
   async create() {
     try {
       await db.insert(roleTable).values({ title: this.title })
@@ -212,7 +220,7 @@ export default class MachineToCRUD {
       await db.insert(rolePermissionTable).values({
         roleId: this.roleId,
         permissionId: this.permissionId,
-        sort: this.permissionType === 'view' ? this.sort : null,
+        sort: this.permissionType === 'view' ? this.order : null,
       })
     } catch (err: any) {
       rollbar.error('Error en DB. Creación de relación de rol con permiso.', err)
@@ -330,6 +338,20 @@ export default class MachineToCRUD {
         .where(eq(roleTable.id, this.roleId))
     } catch (err: any) {
       rollbar.error('Error en DB. Actualización de rol.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async updateRolePermissionOrder() {
+    try {
+      await db
+        .update(rolePermissionTable)
+        .set({
+          sort: this.order,
+        })
+        .where(eq(rolePermissionTable.id, this.rolePermissionId))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Actualización orden en relación de rol con permiso.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }

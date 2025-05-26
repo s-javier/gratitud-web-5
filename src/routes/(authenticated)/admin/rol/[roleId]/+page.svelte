@@ -16,6 +16,7 @@
   import RoleAddPermission from './RoleAddPermission.svelte'
   import MenupageEdit from './MenupageEdit.svelte'
   import MenupageDelete from './MenupageDelete.svelte'
+  import RolePermissionOrder from './RolePermissionOrder.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -23,6 +24,7 @@
   let search = $state('')
   let isAdding = $state(false)
   let isDeletingRelation = $state(false)
+  let isEditingOrder = $state(false)
   let isEditingMenupage = $state(false)
   let isDeletingMenupage = $state(false)
   let row = $state(null)
@@ -217,6 +219,12 @@
       <ActionMenu
         options={[
           {
+            id: 'edit-order',
+            text: 'Editar orden',
+            icon: 'wxi wxi-edit',
+            css: 'text-green-600 force-text-inherit',
+          },
+          {
             id: 'edit-menupage',
             text: 'Editar menú',
             icon: 'wxi wxi-edit',
@@ -239,7 +247,10 @@
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {
-          if (event.action?.id === 'edit-menupage') {
+          if (event.action?.id === 'edit-order') {
+            row = JSON.parse(event.context)
+            isEditingOrder = true
+          } else if (event.action?.id === 'edit-menupage') {
             row = JSON.parse(event.context)
             isEditingMenupage = true
           } else if (event.action?.id === 'delete-menupage') {
@@ -269,13 +280,6 @@
   {/if}
 </div>
 
-<PermissionDeleteRelation
-  bind:isOpen={isDeletingRelation}
-  {table}
-  {search}
-  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
-  {row}
-/>
 <RoleAddPermission
   bind:isOpen={isAdding}
   {table}
@@ -284,6 +288,13 @@
   id={data?.roleAndPermissions?.id}
   title={data?.roleAndPermissions?.title}
   permissions={data?.roleAndPermissions?.missingPermissions}
+/>
+<PermissionDeleteRelation
+  bind:isOpen={isDeletingRelation}
+  {table}
+  {search}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  {row}
 />
 <MenupageEdit
   bind:isOpen={isEditingMenupage}
@@ -297,5 +308,13 @@
   {table}
   {search}
   rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  {row}
+/>
+<RolePermissionOrder
+  bind:isOpen={isEditingOrder}
+  {table}
+  {search}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  roleTitle={data?.roleAndPermissions?.title}
   {row}
 />

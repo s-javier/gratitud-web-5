@@ -158,7 +158,7 @@ export const rolePermissionTableRelations = relations(rolePermissionTable, ({ on
 export const menupageTable = pgTable('menupage', {
   id: uuid().defaultRandom().primaryKey(),
   permissionId: uuid('permission_id')
-    .references(() => permissionTable.id, { onDelete: 'set null' })
+    .references(() => permissionTable.id, { onDelete: 'cascade' })
     .notNull(),
   title: text().notNull(),
   icon: text(),

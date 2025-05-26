@@ -10,6 +10,7 @@
     zIndex?: string
     close?: () => void
     panelTitle?: string
+    position?: string
   } = $props()
   let overlayBackdropRef = $state<HTMLDivElement | null>(null)
   let overlayDialogRef = $state<HTMLDivElement | null>(null)
@@ -68,7 +69,9 @@
 
   {#if props.type === 'dialog'}
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-      <div class="flex min-h-full items-center justify-center p-4 text-center">
+      <div
+        class="flex min-h-full p-4 text-center {props.position ?? 'items-center justify-center'}"
+      >
         <div
           bind:this={overlayDialogRef}
           class={[
@@ -78,7 +81,9 @@
           ]}
         >
           <!-- ↓ Contenedor de modal, no del contenido -->
-          <main class="flex flex-row items-center justify-center">{@render props.children()}</main>
+          <main class="flex flex-row {props.position ?? 'items-center justify-center'}">
+            {@render props.children()}
+          </main>
         </div>
       </div>
     </div>

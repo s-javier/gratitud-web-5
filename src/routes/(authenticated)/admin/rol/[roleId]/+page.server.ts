@@ -19,13 +19,13 @@ export const actions = {
     const roleId = formData.get('roleId')?.toString() || ''
     const permissionId = formData.get('permissionId')?.toString() || ''
     const permissionType = formData.get('permissionType')?.toString() || ''
-    const sort = parseInt(formData.get('sort')?.toString() || '0')
+    const order = parseInt(formData.get('order')?.toString() || '0')
     const path = formData.get('path')?.toString() || ''
 
     const machine = new Role({
       roleId,
       permissionId,
-      sort,
+      order,
       permissionType,
       pathToRedirect: path,
     })
@@ -100,6 +100,29 @@ export const actions = {
     try {
       machine.validateFormToDeleteMenupage()
       await machine.deleteMenupage()
+    } catch {}
+
+    if (machine.hasError()) {
+      return { error: machine.error }
+    }
+
+    throw redirect(303, path)
+  },
+  'edit-role-permission-order': async (event: RequestEvent) => {
+    const formData = await event.request.formData()
+    const rolePermissionId = formData.get('rolePermissionId')?.toString() || ''
+    const permissionType = formData.get('permissionType')?.toString() || ''
+    const order = parseInt(formData.get('order')?.toString() || '0')
+    const path = formData.get('path')?.toString() || ''
+
+    if (permissionType !== 'view') {
+      return { error: { server: 'Solo se le asigna un orden a las vistas.' } }
+    }
+
+    const machine = new Role({ rolePermissionId, order, pathToRedirect: path })
+    try {
+      machine.validateFormToUpdateRolePermissionOrder()
+      await machine.updateRolePermissionOrder()
     } catch {}
 
     if (machine.hasError()) {
