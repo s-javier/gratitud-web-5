@@ -176,7 +176,7 @@
   </div>
 </section>
 
-<div class="flex h-[60%] justify-center">
+<div class="flex h-[65vh] justify-center">
   {#if Material}
     <!-- ↓ dataKey vincula al elemento que gatilla el menú -->
     <!-- ↓ resolver alimenta el "context" que se obtiene en el onclick -->
