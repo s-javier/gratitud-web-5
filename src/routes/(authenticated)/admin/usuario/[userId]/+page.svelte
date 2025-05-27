@@ -11,19 +11,15 @@
   import { Button } from 'noph-ui'
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import TableMenuButton from '~/components/TableMenuButton.svelte'
-  import StatusCell from '~/components/StatusCell.svelte'
-  import UserAE from './UserAE.svelte'
-  import UserDelete from './UserDelete.svelte'
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
-  import { Page } from '~/enums'
+  import RelationDelete from './RelationDelete.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
   let table: any = $state()
   let search = $state('')
   let isAdding = $state(false)
-  let isEditing = $state(false)
-  let isDeleting = $state(false)
+  let isDeletingRelation = $state(false)
   let row = $state(null)
   let filteredRows = $state(0)
 
@@ -40,7 +36,11 @@
   })
 
   $effect(() => {
-    filterAllTableByText(table, search, data?.users?.length ?? 0)
+    filterAllTableByText(
+      table,
+      search,
+      data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length ?? 0,
+    )
   })
 
   const initTable = (api: any) => {
@@ -51,26 +51,9 @@
 
   const columns = [
     {
-      id: 'firstName',
+      id: 'organizationTitle',
       header: [
-        'Nombre(s)',
-        {
-          filter: {
-            type: 'text',
-            config: {
-              icon: 'wxi-search', // Optional icon for the filter input
-              clear: true, // Allow clearing the input
-            },
-          },
-        },
-      ],
-      width: 150,
-      sort: true,
-    },
-    {
-      id: 'lastName',
-      header: [
-        'Apellido(s)',
+        'Organización',
         {
           filter: {
             type: 'text',
@@ -84,9 +67,9 @@
       sort: true,
     },
     {
-      id: 'email',
+      id: 'roleTitle',
       header: [
-        'Email',
+        'Rol',
         {
           filter: {
             type: 'text',
@@ -97,44 +80,7 @@
           },
         },
       ],
-      width: 250,
       sort: true,
-    },
-    {
-      id: 'isActive',
-      // header: ['Activa?', { css: 'flex justify-center' }],
-      header: [
-        'Activo',
-        {
-          filter: {
-            type: 'richselect',
-            config: {
-              // template: (option: any) => {
-              //   return option.label ? 'Activaa' : 'Inactivaa'
-              // },
-              options: [
-                { id: 'active', label: 'Sí' },
-                { id: 'inactive', label: 'No' },
-              ],
-              handler: (value: boolean, filter: string) => {
-                if (!filter) {
-                  return true
-                }
-                return (
-                  (value === true && filter === 'active') ||
-                  (value === false && filter === 'inactive')
-                )
-              },
-            },
-          },
-        },
-      ],
-      width: 100,
-      sort: true,
-      cell: StatusCell,
-      template: (option: any) => {
-        return option.isActive ? 'Activo' : 'Inactivo'
-      },
     },
     {
       id: 'menu',
@@ -146,7 +92,9 @@
 </script>
 
 <section class="flex items-center justify-between">
-  <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">Usuarios</h1>
+  <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
+    Organizaciones y roles
+  </h1>
   <Button
     type="button"
     form="organization-edit"
@@ -165,17 +113,58 @@
   class="mt-6 mb-10 w-full border-t border-zinc-950/10 dark:border-white/10"
 />
 
+<section class="mb-10 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+  <div class="border-t border-gray-100">
+    <dl class="divide-y divide-gray-100">
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">ID</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.userAndOrganizationsAndRoles?.id || 'Hubo un error'}
+        </dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">Nombre(s)</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.userAndOrganizationsAndRoles?.firstName || 'Hubo un error'}
+        </dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">Apellido(s)</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.userAndOrganizationsAndRoles?.lastName || 'Sin apellido(s)'}
+        </dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">Email</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.userAndOrganizationsAndRoles?.email || 'Hubo un error'}
+        </dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-900">Estado</dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          {data?.userAndOrganizationsAndRoles?.isActive ? 'Activo' : 'Inactivo'}
+        </dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
 <section class="items-top mb-4 flex justify-between">
   <div class="text-sm text-gray-500">
     <p>
-      {data?.users?.length === 1 ? 'Existe' : 'Existen'}
-      {data?.users?.length ?? 0}
-      {data?.users?.length === 1 ? 'usuario' : 'usuarios'}.
+      {data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length === 1
+        ? 'Existe'
+        : 'Existen'}
+      {data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length ?? 0}
+      {data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length === 1
+        ? 'relación'
+        : 'relaciones'}.
     </p>
-    {#if table && filteredRows < data?.users?.length}
+    {#if table && filteredRows < data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length}
       <p transition:fade>
         Estás viendo {filteredRows}
-        {filteredRows === 1 ? 'usuario' : 'usuarios'}.
+        {filteredRows === 1 ? 'relación' : 'relaciones'}.
       </p>
     {/if}
   </div>
@@ -193,12 +182,12 @@
         {#if search.length > 0}
           <div transition:fade>
             <button
-              class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
+              class="flex size-6 cursor-pointer items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
               onclick={() => {
                 search = ''
               }}
             >
-              <XMark class="size-5 shrink-0 cursor-pointer" />
+              <XMark class="size-5 shrink-0" />
             </button>
           </div>
         {/if}
@@ -215,20 +204,8 @@
       <ActionMenu
         options={[
           {
-            id: 'relations',
-            text: 'Org. y roles',
-            icon: 'wxi wxi-eye',
-            css: 'text-blue-500 force-text-inherit',
-          },
-          {
-            id: 'edit',
-            text: 'Editar',
-            icon: 'wxi wxi-edit',
-            css: 'text-green-600 force-text-inherit',
-          },
-          {
-            id: 'delete',
-            text: 'Eliminar',
+            id: 'delete-relation',
+            text: 'Eliminar relación',
             icon: 'wxi wxi-delete',
             css: 'text-red-500 force-text-inherit',
           },
@@ -237,14 +214,9 @@
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {
-          if (event.action?.id === 'relations') {
-            goto(`${Page.ADMIN_USER}/${JSON.parse(event.context).id}`)
-          } else if (event.action?.id === 'edit') {
+          if (event.action?.id === 'delete-relation') {
             row = JSON.parse(event.context)
-            isEditing = true
-          } else if (event.action?.id === 'delete') {
-            row = JSON.parse(event.context)
-            isDeleting = true
+            isDeletingRelation = true
           } else {
             row = null
           }
@@ -254,7 +226,7 @@
         <Grid
           init={initTable}
           bind:this={table}
-          data={data.users || []}
+          data={data?.userAndOrganizationsAndRoles?.organizationsAndRoles || []}
           {columns}
           rowStyle={(row: any) => 'hover:bg-gray-100!'}
           columnStyle={(col: any) => (col.id === 'isActive' ? 'text-center' : '')}
@@ -266,13 +238,41 @@
   {/if}
 </div>
 
-<UserAE type="adding" bind:isOpen={isAdding} {table} {search} rows={data?.users.length ?? 0} />
-<UserAE
-  type="editing"
-  bind:isOpen={isEditing}
+<!-- <RoleAddPermission
+  bind:isOpen={isAdding}
   {table}
   {search}
-  rows={data?.users.length ?? 0}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  id={data?.roleAndPermissions?.id}
+  title={data?.roleAndPermissions?.title}
+  permissions={data?.roleAndPermissions?.missingPermissions}
+/> -->
+<RelationDelete
+  bind:isOpen={isDeletingRelation}
+  {table}
+  {search}
+  rows={data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length ?? 0}
   {row}
 />
-<UserDelete bind:isOpen={isDeleting} {table} {search} rows={data?.users.length ?? 0} {row} />
+<!-- <MenupageEdit
+  bind:isOpen={isEditingMenupage}
+  {table}
+  {search}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  {row}
+/> -->
+<!-- <MenupageDelete
+  bind:isOpen={isDeletingMenupage}
+  {table}
+  {search}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  {row}
+/> -->
+<!-- <RolePermissionOrder
+  bind:isOpen={isEditingOrder}
+  {table}
+  {search}
+  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
+  roleTitle={data?.roleAndPermissions?.title}
+  {row}
+/> -->

@@ -11,7 +11,6 @@
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import TableMenuButton from '~/components/TableMenuButton.svelte'
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
-  import { Page } from '~/enums'
   import PermissionDeleteRelation from './PermissionDeleteRelation.svelte'
   import RoleAddPermission from './RoleAddPermission.svelte'
   import MenupageEdit from './MenupageEdit.svelte'

@@ -1,7 +1,12 @@
 import * as v from 'valibot'
-import { eq } from 'drizzle-orm'
+import { and, eq, isNull, or, sql } from 'drizzle-orm'
 import db from '~/lib/server/db'
-import { personTable } from '~/lib/server/db/schema'
+import {
+  personTable,
+  organizationPersonRoleTable,
+  organizationTable,
+  roleTable,
+} from '~/lib/server/db/schema'
 import rollbar from '~/lib/server/rollbar'
 
 export default class User {
@@ -23,6 +28,15 @@ export default class User {
     server?: string
   } = {}
   users: any[] = []
+  userAndOrganizationsAndRoles?: {
+    id: string
+    firstName: string
+    lastName: string | null
+    email: string
+    isActive: boolean
+    organizationsAndRoles: any[]
+    missingOrganizationsAndRoles: any[]
+  }
 
   constructor()
   constructor(input: { firstName: string; lastName: string; email: string; status: boolean })
@@ -197,6 +211,56 @@ export default class User {
     } catch (err: any) {
       rollbar.error('Error en DB. Obtener todos los usuarios.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async readOneByIdWithOrganizationsAndRoles(userId: string) {
+    try {
+      const user = await db
+        .select({
+          id: personTable.id,
+          firstName: personTable.firstName,
+          lastName: personTable.lastName,
+          email: personTable.email,
+          isActive: personTable.isActive,
+        })
+        .from(personTable)
+        .where(eq(personTable.id, userId))
+      const organizationsAndRoles = await db
+        .select({
+          id: organizationPersonRoleTable.id,
+          organizationId: organizationPersonRoleTable.organizationId,
+          organizationTitle: organizationTable.title,
+          roleId: organizationPersonRoleTable.roleId,
+          roleTitle: roleTable.title,
+        })
+        .from(organizationPersonRoleTable)
+        .where(eq(organizationPersonRoleTable.personId, userId))
+        .innerJoin(
+          organizationTable,
+          eq(organizationPersonRoleTable.organizationId, organizationTable.id),
+        )
+        .innerJoin(roleTable, eq(organizationPersonRoleTable.roleId, roleTable.id))
+      const missingOrganizationsAndRoles = await db.execute(
+        sql`
+          SELECT o.id AS "organizationId", o.title AS "organizationTitle", r.id AS "roleId", r.title AS "roleTitle"
+          FROM ${organizationTable} o
+          CROSS JOIN ${roleTable} r
+          WHERE NOT EXISTS (
+            SELECT 1 FROM ${organizationPersonRoleTable} orr
+            WHERE orr.organization_id = o.id AND orr.role_id = r.id
+          )
+          `,
+      )
+      this.userAndOrganizationsAndRoles = {
+        ...user[0],
+        organizationsAndRoles,
+        missingOrganizationsAndRoles: missingOrganizationsAndRoles.rows,
+      }
+    } catch (err: any) {
+      rollbar.error('Error en DB. Obtener un usuario con sus ogreanizaciones y roles.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+      throw new Error()
     }
   }
 

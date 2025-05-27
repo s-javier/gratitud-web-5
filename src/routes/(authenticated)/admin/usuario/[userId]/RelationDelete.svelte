@@ -20,12 +20,10 @@
     search: string
     rows: number
     row?: {
-      id: string
-      path: string
-      type: string
-      /* ↓ menupage. */
-      menupageId: string
-      menupageTitle: string
+      id: string /* id de relación */
+      organizationId: string
+      organizationTitle: string
+      roleTitle: string
     } | null
   } = $props()
   let isConfirmed = $state(false)
@@ -43,23 +41,23 @@
 </script>
 
 <Overlay type="dialog" isActive={isOpen} width="max-w-[500px]">
-  <Modal title={`Eliminación de menú ${props.row?.menupageTitle}`} close={() => (isOpen = false)}>
+  <Modal title="Eliminación de relación" close={() => (isOpen = false)}>
     <section class="mb-4">
-      <p><b>Ruta</b>: {props.row?.path}.</p>
-      <p><b>Tipo</b>: {props.row?.type ? (props.row?.type === 'view' ? 'vista' : 'API') : ''}.</p>
+      <p><b>Organización</b>: {props.row?.organizationTitle}.</p>
+      <p><b>Rol</b>: {props.row?.roleTitle}.</p>
     </section>
     <section class="mb-6">
       <p class="mb-2 text-base leading-relaxed text-gray-500 dark:text-gray-400">
-        ¿Estás seguro de eliminar el menú <b>{props.row?.menupageTitle}</b>?
+        ¿Estás seguro de eliminar la relación?
       </p>
       <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
         Considere que esta acción no se puede deshacer.
       </p>
     </section>
     <form
-      id="delete-menu"
+      id="delete-relation"
       method="POST"
-      action="?/delete-menu"
+      action="?/delete-relation"
       use:enhance={() => {
         toast.removeAll()
         overlayLoader.is = true
@@ -87,7 +85,7 @@
         }
       }}
     >
-      <input type="hidden" name="menupageId" value={props.row?.menupageId} />
+      <input type="hidden" name="menupageId" value={props.row?.id} />
       <input type="hidden" name="path" value={page.url.pathname} />
       <div class="rounded-sm border {isConfirmedErr ? 'border-red-400' : 'border-gray-300'}">
         <Checkbox
@@ -116,7 +114,7 @@
         </Button>
         <Button
           type="submit"
-          form="delete-menu"
+          form="delete-relation"
           variant="filled"
           class="text-center! text-base!"
           --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
