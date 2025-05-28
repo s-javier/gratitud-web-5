@@ -7,14 +7,24 @@ export default class MachineToChange {
   personId: string
   oldOrganizationId: string
   newOrganizationId: string
+  oldRoleId: string
+  newRoleId: string
   error: {
     server?: string
   } = {}
 
-  constructor(personId: string, oldOrganizationId: string, newOrganizationId: string) {
-    this.personId = personId
-    this.oldOrganizationId = oldOrganizationId
-    this.newOrganizationId = newOrganizationId
+  constructor(input: {
+    userId: string
+    oldOrganizationId: string
+    newOrganizationId: string
+    oldRoleId: string
+    newRoleId: string
+  }) {
+    this.personId = input.userId
+    this.oldOrganizationId = input.oldOrganizationId
+    this.newOrganizationId = input.newOrganizationId
+    this.oldRoleId = input.oldRoleId
+    this.newRoleId = input.newRoleId
   }
 
   hasError() {
@@ -22,7 +32,7 @@ export default class MachineToChange {
   }
 
   validateOrganizationId() {
-    if (this.oldOrganizationId === this.newOrganizationId) {
+    if (this.oldOrganizationId === this.newOrganizationId && this.oldRoleId === this.newRoleId) {
       throw new Error()
     }
   }
@@ -59,6 +69,7 @@ export default class MachineToChange {
         .where(
           and(
             eq(organizationPersonRoleTable.organizationId, this.newOrganizationId),
+            eq(organizationPersonRoleTable.roleId, this.newRoleId),
             eq(organizationPersonRoleTable.personId, this.personId),
           ),
         )
@@ -76,7 +87,8 @@ export default class MachineToChange {
         .set({ isSelected: false })
         .where(
           and(
-            ne(organizationPersonRoleTable.organizationId, this.newOrganizationId),
+            eq(organizationPersonRoleTable.organizationId, this.oldOrganizationId),
+            eq(organizationPersonRoleTable.roleId, this.oldRoleId),
             eq(organizationPersonRoleTable.personId, this.personId),
           ),
         )

@@ -16,6 +16,7 @@
   import MenupageEdit from './MenupageEdit.svelte'
   import MenupageDelete from './MenupageDelete.svelte'
   import RolePermissionOrder from './RolePermissionOrder.svelte'
+  import { Item } from '~/components/ui/command'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -216,6 +217,7 @@
     <!-- ↓ resolver alimenta el "context" que se obtiene en el onclick -->
     <Material>
       <ActionMenu
+        at="bottom"
         options={[
           {
             id: 'edit-order',
@@ -242,7 +244,18 @@
             css: 'text-red-500 force-text-inherit',
           },
         ]}
-        at="point"
+        filter={(menuItem: any, task: any) => {
+          const row = JSON.parse(task)
+          /* ↓ Hide the "delete" item for projects */
+          if (menuItem.id === 'edit-order' && row.type === 'api') {
+            return false
+          } else if (menuItem.id === 'edit-menupage' && row.type === 'api') {
+            return false
+          } else if (menuItem.id === 'delete-menupage' && row.type === 'api') {
+            return false
+          }
+          return true
+        }}
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {

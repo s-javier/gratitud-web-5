@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, type SvelteComponent } from 'svelte'
   import { fade } from 'svelte/transition'
-  import { goto } from '$app/navigation'
   import { toast } from 'svoast'
   // @ts-ignore
   import { Grid } from 'wx-svelte-grid'
@@ -12,7 +11,9 @@
   import { MagnifyingGlass, XMark } from 'svelte-heros-v2'
   import TableMenuButton from '~/components/TableMenuButton.svelte'
   import filterAllTableByText from '~/lib/filter-all-table-by-text'
+  import RelationAdd from './RelationAdd.svelte'
   import RelationDelete from './RelationDelete.svelte'
+  import StatusCell from '~/components/StatusCell.svelte'
 
   let Material: typeof SvelteComponent | null = $state(null)
   let { data }: any = $props()
@@ -81,6 +82,42 @@
         },
       ],
       sort: true,
+    },
+    {
+      id: 'isSelected',
+      // header: ['Activa?', { css: 'flex justify-center' }],
+      header: [
+        'Seleccionado',
+        {
+          filter: {
+            type: 'richselect',
+            config: {
+              // template: (option: any) => {
+              //   return option.label ? 'Activaa' : 'Inactivaa'
+              // },
+              options: [
+                { id: 'active', label: 'Sí' },
+                { id: 'inactive', label: 'No' },
+              ],
+              handler: (value: boolean, filter: string) => {
+                if (!filter) {
+                  return true
+                }
+                return (
+                  (value === true && filter === 'active') ||
+                  (value === false && filter === 'inactive')
+                )
+              },
+            },
+          },
+        },
+      ],
+      width: 120,
+      sort: true,
+      cell: StatusCell,
+      template: (option: any) => {
+        return option.isSelected ? 'Sí' : 'No'
+      },
     },
     {
       id: 'menu',
@@ -202,6 +239,7 @@
     <!-- ↓ resolver alimenta el "context" que se obtiene en el onclick -->
     <Material>
       <ActionMenu
+        at="bottom"
         options={[
           {
             id: 'delete-relation',
@@ -210,7 +248,6 @@
             css: 'text-red-500 force-text-inherit',
           },
         ]}
-        at="point"
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {
@@ -238,15 +275,18 @@
   {/if}
 </div>
 
-<!-- <RoleAddPermission
+<RelationAdd
   bind:isOpen={isAdding}
   {table}
   {search}
-  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
-  id={data?.roleAndPermissions?.id}
-  title={data?.roleAndPermissions?.title}
-  permissions={data?.roleAndPermissions?.missingPermissions}
-/> -->
+  rows={data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length ?? 0}
+  id={data?.userAndOrganizationsAndRoles?.id}
+  firstName={data?.userAndOrganizationsAndRoles?.firstName}
+  lastName={data?.userAndOrganizationsAndRoles?.lastName}
+  email={data?.userAndOrganizationsAndRoles?.email}
+  isActive={data?.userAndOrganizationsAndRoles?.isActive}
+  relations={data?.userAndOrganizationsAndRoles?.missingOrganizationsAndRoles}
+/>
 <RelationDelete
   bind:isOpen={isDeletingRelation}
   {table}
@@ -254,25 +294,3 @@
   rows={data?.userAndOrganizationsAndRoles?.organizationsAndRoles?.length ?? 0}
   {row}
 />
-<!-- <MenupageEdit
-  bind:isOpen={isEditingMenupage}
-  {table}
-  {search}
-  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
-  {row}
-/> -->
-<!-- <MenupageDelete
-  bind:isOpen={isDeletingMenupage}
-  {table}
-  {search}
-  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
-  {row}
-/> -->
-<!-- <RolePermissionOrder
-  bind:isOpen={isEditingOrder}
-  {table}
-  {search}
-  rows={data?.roleAndPermissions?.permissions?.length ?? 0}
-  roleTitle={data?.roleAndPermissions?.title}
-  {row}
-/> -->

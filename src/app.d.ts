@@ -12,6 +12,7 @@ declare global {
       organizationsToChange: any[]
       userId: string
       organizationId: string
+      roleId: string
     }
     // interface PageData {}
     // interface PageState {}

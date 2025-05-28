@@ -85,7 +85,7 @@
         }
       }}
     >
-      <input type="hidden" name="menupageId" value={props.row?.id} />
+      <input type="hidden" name="organizationUserRoleId" value={props.row?.id} />
       <input type="hidden" name="path" value={page.url.pathname} />
       <div class="rounded-sm border {isConfirmedErr ? 'border-red-400' : 'border-gray-300'}">
         <Checkbox

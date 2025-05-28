@@ -64,6 +64,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
       organizationsToChange: auth.organizationsToChange,
       userId: auth.session.personId,
       organizationId: auth.userOrgRole.organizationId,
+      roleId: auth.userOrgRole.roleId,
     }
   }
 

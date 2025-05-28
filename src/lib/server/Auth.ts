@@ -466,15 +466,18 @@ export default class Machine {
     try {
       query = await db
         .select({
-          id: organizationTable.id,
-          title: organizationTable.title,
+          organizationId: organizationTable.id,
+          organizationTitle: organizationTable.title,
+          roleId: roleTable.id,
+          roleTitle: roleTable.title,
           isSelected: organizationPersonRoleTable.isSelected,
         })
-        .from(organizationTable)
+        .from(organizationPersonRoleTable)
         .innerJoin(
-          organizationPersonRoleTable,
+          organizationTable,
           eq(organizationTable.id, organizationPersonRoleTable.organizationId),
         )
+        .innerJoin(roleTable, eq(roleTable.id, organizationPersonRoleTable.roleId))
         .where(eq(organizationPersonRoleTable.personId, this.session.personId))
     } catch (e: any) {
       rollbar.error('Error en DB. Clase Auth. Middleware. Get de organizaciones para cambiar.', e)

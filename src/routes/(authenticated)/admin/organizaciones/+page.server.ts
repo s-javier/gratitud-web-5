@@ -18,12 +18,23 @@ export const actions = {
   change: async (event: RequestEvent) => {
     const data = await event.request.formData()
     const organizationId = data.get('organizationId')?.toString() || ''
+    const roleId = data.get('roleId')?.toString() || ''
 
-    const machine = new MachineToChange(
-      event.locals.userId,
-      event.locals.organizationId,
-      organizationId,
-    )
+    console.log({
+      userId: event.locals.userId,
+      oldOrganizationId: event.locals.organizationId,
+      newOrganizationId: organizationId,
+      oldRoleId: event.locals.roleId,
+      newRoleId: roleId,
+    })
+
+    const machine = new MachineToChange({
+      userId: event.locals.userId,
+      oldOrganizationId: event.locals.organizationId,
+      newOrganizationId: organizationId,
+      oldRoleId: event.locals.roleId,
+      newRoleId: roleId,
+    })
     try {
       machine.validateOrganizationId()
       await machine.getOrganizationToChange()

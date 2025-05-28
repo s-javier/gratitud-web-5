@@ -1,11 +1,11 @@
 <script>
   let props = $props()
 
-  let status = $derived(props.row.isActive ? 'Sí' : 'No')
+  let status = $derived(props.row.isActive || props.row.isSelected ? 'Sí' : 'No')
 </script>
 
 <div class="container flex justify-center">
-  <div class="status {props.row.isActive ? 'active' : 'non-active'}">
+  <div class="status {props.row.isActive || props.row.isSelected ? 'active' : 'non-active'}">
     <div class="dot"></div>
     {status}
   </div>

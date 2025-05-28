@@ -133,7 +133,7 @@
       sort: true,
       cell: StatusCell,
       template: (option: any) => {
-        return option.isActive ? 'Activo' : 'Inactivo'
+        return option.isActive ? 'Sí' : 'No'
       },
     },
     {
@@ -213,6 +213,7 @@
     <!-- ↓ resolver alimenta el "context" que se obtiene en el onclick -->
     <Material>
       <ActionMenu
+        at="bottom"
         options={[
           {
             id: 'relations',
@@ -233,7 +234,6 @@
             css: 'text-red-500 force-text-inherit',
           },
         ]}
-        at="point"
         dataKey="actionId"
         resolver={(row: string) => row}
         onclick={(event: any) => {

@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import { and, eq, isNull, or, sql } from 'drizzle-orm'
+import { and, eq, is, isNull, or, sql } from 'drizzle-orm'
 import db from '~/lib/server/db'
 import {
   personTable,
@@ -15,6 +15,9 @@ export default class User {
   lastName: string
   email: string
   status: boolean
+  organizationId: string
+  roleId: string
+  organizationUserRoleId: string
   isConfirmed: boolean
   pathToRedirect: string
   error: {
@@ -23,6 +26,9 @@ export default class User {
     lastName?: string
     email?: string
     status?: string
+    organizationId?: string
+    roleId?: string
+    organizationUserRoleId?: string
     isConfirmed?: string
     pathToRedirect?: string
     server?: string
@@ -48,6 +54,17 @@ export default class User {
     status: boolean
   })
   constructor(input: { isConfirmed: boolean; userId: string })
+  constructor(input: {
+    organizationId: string
+    userId: string
+    roleId: string
+    pathToRedirect: string
+  })
+  constructor(input: {
+    organizationUserRoleId: string
+    isConfirmed: boolean
+    pathToRedirect: string
+  })
 
   constructor(
     input: {
@@ -56,8 +73,11 @@ export default class User {
       lastName?: string
       email?: string
       status?: boolean
+      organizationId?: string
+      roleId?: string
       isConfirmed?: boolean
       pathToRedirect?: string
+      organizationUserRoleId?: string
     } = {},
   ) {
     this.userId = input.userId ?? ''
@@ -66,6 +86,9 @@ export default class User {
     this.email = input.email ?? ''
     this.status = input.status ?? false
     this.isConfirmed = input.isConfirmed ?? false
+    this.organizationId = input.organizationId ?? ''
+    this.roleId = input.roleId ?? ''
+    this.organizationUserRoleId = input.organizationUserRoleId ?? ''
     this.pathToRedirect = input.pathToRedirect ?? ''
   }
 
@@ -183,6 +206,20 @@ export default class User {
     this.validateForm()
   }
 
+  validateFormToCreateRelation() {
+    this.validateId({ id: this.userId, key: 'userId' })
+    this.validateId({ id: this.organizationId, key: 'organizationId' })
+    this.validateId({ id: this.roleId, key: 'roleId' })
+    this.validatePathToRedirect
+    this.validateForm()
+  }
+
+  validateFormToDeleteRelation() {
+    this.validateId({ id: this.organizationUserRoleId, key: 'organizationUserRoleId' })
+    this.validateIsConfirmed()
+    this.validateForm()
+  }
+
   async create() {
     try {
       await db.insert(personTable).values({
@@ -193,6 +230,20 @@ export default class User {
       })
     } catch (err: any) {
       rollbar.error('Error en DB. Creación de usuario.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async createOrganizatioUserRole() {
+    try {
+      await db.insert(organizationPersonRoleTable).values({
+        organizationId: this.organizationId,
+        personId: this.userId,
+        roleId: this.roleId,
+        isSelected: false,
+      })
+    } catch (err: any) {
+      rollbar.error('Error en DB. Creación de organización - usuario - rol.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }
@@ -233,6 +284,7 @@ export default class User {
           organizationTitle: organizationTable.title,
           roleId: organizationPersonRoleTable.roleId,
           roleTitle: roleTable.title,
+          isSelected: organizationPersonRoleTable.isSelected,
         })
         .from(organizationPersonRoleTable)
         .where(eq(organizationPersonRoleTable.personId, userId))
@@ -286,6 +338,17 @@ export default class User {
       await db.delete(personTable).where(eq(personTable.id, this.userId))
     } catch (err: any) {
       rollbar.error('Error en DB. Eliminación de usuario.', err)
+      this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
+    }
+  }
+
+  async deleteOrganizationUserRole() {
+    try {
+      await db
+        .delete(organizationPersonRoleTable)
+        .where(eq(organizationPersonRoleTable.id, this.organizationUserRoleId))
+    } catch (err: any) {
+      rollbar.error('Error en DB. Eliminación de organización - usuario - rol.', err)
       this.error.server = 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.'
     }
   }

@@ -58,7 +58,7 @@
     props.relations.map((relation) => {
       return {
         label: `${relation.organizationTitle} - ${relation.roleTitle}`,
-        value: `${relation.organizationId}-${relation.roleId}`,
+        value: `${relation.organizationId} - ${relation.roleId}`,
         organizationId: relation.organizationId,
         roleId: relation.roleId,
       }
@@ -97,15 +97,10 @@
           await applyAction(result)
           overlayLoader.is = false
           if ('data' in result && result.data?.error) {
-            if (result.data.error.permissionId) {
-              permissionIdErr = result.data.error.permissionId
-            }
-            if (result.data.error.order) {
-              orderErr = result.data.error.order
-            }
-            if (result.data.error.permissionId || result.data.error.order) {
+            if (result.data.error.organizationId || result.data.error.roleId) {
+              relationErr = result.data.error.organizationId || result.data.error.roleId
               toast.error('Por favor, corrige el formulario.', { closable: true })
-            } else if (result.data.error.permissionType || result.data.error.pathToRedirect) {
+            } else if (result.data.error.pathToRedirect) {
               toast.error('Hubo un error. Por favor, recarga la página para corregirlo.', {
                 closable: true,
               })
@@ -126,7 +121,7 @@
       <input type="hidden" name="path" value={page.url.pathname} />
       <section>
         <Label for="type" class={cn('mb-1 text-base', relationErr && 'text-red-500')}>
-          Permiso
+          Organización - Rol
         </Label>
         <Popover.Root bind:open>
           <Popover.Trigger bind:ref={triggerRef}>
@@ -137,7 +132,7 @@
                   'mb-0 flex min-h-12.5 items-center justify-between',
                   'rounded-lg border-1 border-gray-300 py-3 pr-3 pl-4',
                   open && 'border-(--o-input-border-focus-color)',
-                  permissionIdErr && 'border-red-500',
+                  relationErr && 'border-red-500',
                 )}
                 aria-expanded={open}
               >
@@ -145,14 +140,14 @@
                   {selectedValue || ''}
                 </div>
                 <div class="flex items-center gap-x-2">
-                  {#if permissionId !== ''}
+                  {#if relationErr !== ''}
                     <button
                       type="button"
                       class="flex size-6 items-center justify-center rounded-md hover:bg-slate-200 hover:text-(--o-btn-primary-bg-color)"
                       onclick={(e) => {
                         e.stopPropagation()
-                        permissionId = ''
-                        permissionType = ''
+                        organizationId = ''
+                        roleId = ''
                         open = false
                       }}
                     >
@@ -173,17 +168,17 @@
               <Command.List>
                 <Command.Empty>Permiso no encontrado.</Command.Empty>
                 <Command.Group>
-                  {#each missingPermissions as item}
+                  {#each missingRelations as item}
                     <Command.Item
                       value={item.label}
                       onSelect={() => {
-                        permissionId = item.value
-                        permissionType = item.type
+                        organizationId = item.organizationId
+                        roleId = item.roleId
                         closeAndFocusTrigger()
                       }}
                     >
                       <CheckIcon
-                        class={cn('mr-2 size-4', permissionId !== item.value && 'text-transparent')}
+                        class={cn('mr-2 size-4', relationErr !== item.value && 'text-transparent')}
                       />
                       {item.label}
                     </Command.Item>
@@ -193,49 +188,12 @@
             </Command.Root>
           </Popover.Content>
         </Popover.Root>
-        {#if permissionIdErr}
+        {#if relationErr}
           <p in:fade class="mt-1 text-xs text-red-500">
-            {permissionIdErr}
+            {relationErr}
           </p>
         {/if}
       </section>
-      {#if permissionType === 'view'}
-        <section in:fade>
-          <Label for="order" class="mb-1 text-base" color={orderErr ? 'red' : 'gray'}>Orden</Label>
-          <Input
-            type="number"
-            id="order"
-            name="order"
-            size="lg"
-            color={orderErr ? 'red' : 'default'}
-          >
-            {#snippet children(props)}
-              <input
-                {...props}
-                bind:value={order}
-                class={cn(
-                  props.class,
-                  'bg-white ring-(--o-input-border-focus-color)',
-                  orderErr && 'pr-10',
-                )}
-                onfocus={() => {
-                  orderErr = ''
-                }}
-              />
-            {/snippet}
-            {#snippet right()}
-              {#if orderErr}
-                <ExclamationCircleSolid class="size-6 text-red-400" />
-              {/if}
-            {/snippet}
-          </Input>
-          {#if orderErr}
-            <p in:fade class="mt-1 text-xs text-red-500">
-              {orderErr}
-            </p>
-          {/if}
-        </section>
-      {/if}
     </form>
     {#snippet footer()}
       <div class="flex w-full items-center justify-between gap-2">

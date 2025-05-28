@@ -15,6 +15,9 @@
   let organizationsRef: HTMLElement | null = $state(null)
   let isOpenUser = $state(false)
   let userRef: HTMLElement | null = $state(null)
+  let selectedOrganization = $derived(
+    organizationsToChange.find((element: any) => element.isSelected),
+  )
 
   function handleClickOutside(event: any) {
     if (organizationsRef && !organizationsRef.contains(event.target)) {
@@ -56,7 +59,9 @@
             <div class="flex items-center gap-x-4">
               <BuildingOutline class="size-6 text-gray-400" />
               <span aria-hidden="true">
-                {organizationsToChange.find((element: any) => element.isSelected).title}
+                {selectedOrganization
+                  ? `${selectedOrganization.organizationTitle} - ${selectedOrganization.roleTitle}`
+                  : ''}
               </span>
             </div>
             <ChevronDownOutline />
@@ -81,7 +86,7 @@
                 >
                   Account settings
                 </a> -->
-                {#each organizationsToChange.filter((element: any) => element.isSelected === false) as organization}
+                {#each organizationsToChange.filter((element: any) => element.isSelected === false) as item}
                   <form
                     method="POST"
                     action="/admin/organizaciones?/change"
@@ -101,13 +106,14 @@
                       }
                     }}
                   >
-                    <input type="hidden" name="organizationId" value={organization.id} />
+                    <input type="hidden" name="organizationId" value={item.organizationId} />
+                    <input type="hidden" name="roleId" value={item.roleId} />
                     <button
                       type="submit"
                       class="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                       onclick={() => (isOpenOrganizations = false)}
                     >
-                      {organization.title}
+                      {item.organizationTitle} - {item.roleTitle}
                     </button>
                   </form>
                 {/each}
