@@ -1,6 +1,8 @@
 import { type RequestEvent, redirect } from '@sveltejs/kit'
-import { Page } from '~/enums'
+import axios, { Axios, type AxiosError, type AxiosResponse } from 'axios'
+import { General, Page } from '~/enums'
 import Auth from '~/lib/server/Auth'
+import { API } from '$env/static/private'
 
 export const actions = {
   default: async (event: RequestEvent) => {
@@ -8,19 +10,20 @@ export const actions = {
     const auxEmail = data.get('email')
     const email: string = typeof auxEmail === 'string' ? auxEmail : ''
 
-    const auth = new Auth({ email })
+    let result: AxiosResponse | null = null
     try {
-      await auth.validateEmail()
-      await auth.getUserFromLogin()
-      auth.validateUserStatusFromLogin()
-      await auth.createSession()
-      await auth.sendEmail()
-    } catch {}
-
-    if (auth.hasError()) {
-      return { error: auth.error }
+      result = await axios.post(`${API}/auth/login`, { projectTitle: General.TITLE, email })
+    } catch (error: AxiosError | any) {
+      console.log(error.message)
     }
-    event.cookies.set('login', 'true', { path: '/' })
-    redirect(303, Page.CODE)
+    console.log('***', result?.data)
+
+    return { error: 'Probando...' }
+
+    // if (auth.hasError()) {
+    //   return { error: auth.error }
+    // }
+    // event.cookies.set('login', 'true', { path: '/' })
+    // redirect(303, Page.CODE)
   },
 }
