@@ -1,7 +1,7 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
-import { Page } from '~/enums'
-import { NODE_ENV } from '$env/static/private'
-import Auth from '~/lib/server/Auth'
+import axios, { AxiosError, type AxiosResponse } from 'axios'
+import { Api, General, Page } from '~/enums'
+import { API, NODE_ENV } from '$env/static/private'
 
 export function load(event: RequestEvent) {
   if (event.cookies.get('login') === undefined || event.cookies.get('login') !== 'true') {
@@ -21,20 +21,23 @@ export const actions = {
     const auxCode = data.get('otp')
     const code: string = typeof auxCode === 'string' ? auxCode : ''
 
-    const auth = new Auth({ timeLimit, code })
+    let result: AxiosResponse
     try {
-      auth.validateTimeLimitAndCode()
-      await auth.getSessionFromCode()
-      auth.validateCodeStatus()
-      auth.validateCodeExpiration()
-      await auth.disableCodeAndActiveSession()
-      await auth.disableMultipleSessions()
-    } catch {}
-
-    if (auth.hasError()) {
-      return { error: auth.error }
+      result = await axios.post(`${API}${Api.AUTH_SIGN_IN_CODE}`, { timeLimit, code })
+    } catch (error: AxiosError | any) {
+      return {
+        error: {
+          server: 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.',
+        },
+      }
     }
-    event.cookies.set('token', auth.session.id!, { path: '/' })
+    if (result?.data?.error) {
+      return {
+        error: result.data.error,
+      }
+    }
+    console.log('token', result.data.token)
+    event.cookies.set('token', result.data.token, { path: '/' })
     redirect(303, Page.ADMIN_WELCOME)
   },
 }

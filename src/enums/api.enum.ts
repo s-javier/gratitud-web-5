@@ -1,8 +1,8 @@
 export enum Api {
   SITE_HIRE = '/site/hire',
 
-  AUTH_SIGN_IN_EMAIL = '/auth/sign-in/email',
-  AUTH_SIGN_IN_CODE = '/auth/sign-in/code',
+  AUTH_SIGN_IN_EMAIL = '/auth/login',
+  AUTH_SIGN_IN_CODE = '/auth/code',
   AUTH_SIGN_OUT = '/auth/sign-out',
   AUTH_VERIFY_CODE = '/auth/verify-code',
   AUTH_VERIFY_USER_TOKEN = '/auth/verify-user-token',
