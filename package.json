@@ -52,7 +52,7 @@
     "motion": "12.18.1",
     "nanoid": "5.1.5",
     "nodemailer": "7.0.3",
-    "noph-ui": "0.17.10",
+    "noph-ui": "0.17.11",
     "pg": "8.16.0",
     "postgres": "3.4.7",
     "resend": "4.6.0",
