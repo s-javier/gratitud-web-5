@@ -22,16 +22,6 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
   if (event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/gratitud')) {
     const sessionId = event.cookies.get('token')
     let pathname = event.url.pathname /* -> Se utiliza para validar permisos */
-    /* ▼ Permiso artificial */
-    if (
-      [Page.ADMIN_ORGANIZATIONS].includes(pathname) ||
-      event.url.pathname.startsWith(Page.ADMIN_ROLE) ||
-      event.url.pathname.startsWith(Page.ADMIN_PERMISSION) ||
-      event.url.pathname.startsWith(Page.ADMIN_USER)
-    ) {
-      pathname = Page.ADMIN_WELCOME
-    }
-    /* ▲ Permiso artificial */
     const auth = new Auth({ sessionId, pathname })
     try {
       auth.validateSessionId()

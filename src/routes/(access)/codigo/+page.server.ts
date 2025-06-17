@@ -1,7 +1,7 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
 import axios, { AxiosError, type AxiosResponse } from 'axios'
-import { Api, General, Page } from '~/enums'
-import { API, NODE_ENV } from '$env/static/private'
+import { Api, Page } from '~/enums'
+import { AUTH_API, MAX_ACTIVE_SESSIONS, NODE_ENV, PROJECT_ID } from '$env/static/private'
 
 export function load(event: RequestEvent) {
   if (event.cookies.get('login') === undefined || event.cookies.get('login') !== 'true') {
@@ -23,7 +23,12 @@ export const actions = {
 
     let result: AxiosResponse
     try {
-      result = await axios.post(`${API}${Api.AUTH_SIGN_IN_CODE}`, { timeLimit, code })
+      result = await axios.post(`${AUTH_API}${Api.AUTH_SIGN_IN_CODE}`, {
+        projectId: PROJECT_ID,
+        timeLimit,
+        code,
+        maxActiveSessions: parseInt(MAX_ACTIVE_SESSIONS),
+      })
     } catch (error: AxiosError | any) {
       return {
         error: {
