@@ -14,7 +14,7 @@
     "lint": "prettier --check ."
   },
   "devDependencies": {
-    "@lucide/svelte": "0.515.0",
+    "@lucide/svelte": "0.516.0",
     "@sveltejs/adapter-node": "5.2.12",
     "@sveltejs/kit": "2.21.5",
     "@sveltejs/vite-plugin-svelte": "5.1.0",
@@ -52,7 +52,7 @@
     "motion": "12.18.1",
     "nanoid": "5.1.5",
     "nodemailer": "7.0.3",
-    "noph-ui": "0.17.11",
+    "noph-ui": "0.17.13",
     "pg": "8.16.0",
     "postgres": "3.4.7",
     "resend": "4.6.0",
