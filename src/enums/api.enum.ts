@@ -3,6 +3,7 @@ export enum Api {
 
   AUTH_SIGN_IN_EMAIL = '/auth/login',
   AUTH_SIGN_IN_CODE = '/auth/code',
+  AUTH_VALIDATE_ACCESS = '/auth/validate-access',
   AUTH_SIGN_OUT = '/auth/sign-out',
   AUTH_VERIFY_CODE = '/auth/verify-code',
   AUTH_VERIFY_USER_TOKEN = '/auth/verify-user-token',

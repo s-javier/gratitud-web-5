@@ -1,7 +1,8 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit'
-import { NODE_ENV } from '$env/static/private'
-import { Page } from '~/enums'
-import Auth from '~/lib/server/Auth'
+import { AUTH_API, NODE_ENV } from '$env/static/private'
+import axios, { AxiosError, type AxiosResponse } from 'axios'
+
+import { Api, Page } from '~/enums'
 
 export async function handle({ event, resolve }: { event: RequestEvent; resolve: any }) {
   if (event.url.pathname.startsWith('/.well-known/appspecific/com.chrome.devtools')) {
@@ -19,42 +20,41 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
   /**
    * Validar autenticación y permisos.
    */
-  if (event.url.pathname.startsWith('/admin') || event.url.pathname.startsWith('/gratitud')) {
+  const path = event.url.pathname
+  if (path === '/welcome' || path.startsWith('/gratitud')) {
     const sessionId = event.cookies.get('token')
-    let pathname = event.url.pathname /* -> Se utiliza para validar permisos */
-    const auth = new Auth({ sessionId, pathname })
+
+    let result: AxiosResponse
     try {
-      auth.validateSessionId()
-      await auth.getSessionFromMiddleware()
-      auth.validateSessionStatus()
-      auth.validateSessionExpiration()
-      await auth.getUserFromMiddleware()
-      auth.validateUserStatusFromMiddleware()
-      await auth.getUserOrgRole()
-      await auth.getOrganizationsToChange()
-      await auth.getMenu()
-      await auth.getOrganization()
-      await auth.validateOrganizationStatus()
-      await auth.getPermissions()
-      auth.validatePermission()
-    } catch {}
-    if (auth.hasErrorToRedirectLogin()) {
+      result = await axios.post(`${AUTH_API}${Api.AUTH_VALIDATE_ACCESS}`, {
+        sessionId,
+        path,
+      })
+    } catch (error: AxiosError | any) {
       event.cookies.delete('token', { path: '/' })
       redirect(303, Page.LOGIN)
     }
-    /* ↓ Sucede cuando el usuario no tiene la organización activa o no tiene permisos,
-     *   pero sí está autenticado correctamente. */
-    if (auth.hasErrorToRedirectWelcome()) {
+
+    /* ↓ error: { server?: string; isRedirectToLogin?: boolean } */
+    if (result.data.error) {
+      if (result.data.error.isRedirectToLogin) {
+        event.cookies.delete('token', { path: '/' })
+        redirect(303, Page.LOGIN)
+      } else if (result.data.error.server) {
+        event.locals.error = result.data.error
+      }
+    } else if (path !== '/welcome' && result.data.isRedirectToWelcome) {
       redirect(303, Page.ADMIN_WELCOME)
-    }
-    event.locals = {
-      error: auth.hasError() ? auth.error : null,
-      userFirstName: auth.user.firstName,
-      menu: auth.menu,
-      organizationsToChange: auth.organizationsToChange,
-      userId: auth.session.personId,
-      organizationId: auth.userOrgRole.organizationId,
-      roleId: auth.userOrgRole.roleId,
+    } else {
+      event.locals = {
+        error: null,
+        userId: result.data.userId,
+        userFirstName: result.data.userFirstName,
+        menuPages: result.data.menuPages,
+        organizationsToChange: result.data.organizationsToChange,
+        organizationId: result.data.organizationId,
+        roleId: result.data.roleId,
+      }
     }
   }
 

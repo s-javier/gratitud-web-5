@@ -5,14 +5,14 @@ declare global {
     // interface Error {}
     interface Locals {
       error: {
-        server?: string
+        server: string
       } | null
-      userFirstName: string
-      menu: any[]
-      organizationsToChange: any[]
-      userId: string
-      organizationId: string
-      roleId: string
+      userId: string | undefined
+      userFirstName: string | undefined
+      menuPages: any[] | undefined
+      organizationsToChange: any[] | undefined
+      organizationId: string | undefined
+      roleId: string | undefined
     }
     // interface PageData {}
     // interface PageState {}
