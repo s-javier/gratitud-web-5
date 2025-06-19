@@ -2,7 +2,7 @@ export const Page = {
   LOGIN: '/ingreso',
   CODE: '/codigo',
 
-  ADMIN_WELCOME: '/admin/welcome',
+  WELCOME: '/welcome',
 
   ADMIN_ORGANIZATIONS: '/admin/organizaciones',
   ADMIN_ROLES: '/admin/roles',

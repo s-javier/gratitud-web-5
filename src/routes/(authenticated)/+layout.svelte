@@ -83,7 +83,7 @@
           <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2">
             <SidebarContent
               organizationsToChange={data.organizationsToChange}
-              menu={data.menu}
+              menuPages={data.menuPages}
               userFirstName={data.userFirstName}
             />
           </div>
@@ -98,7 +98,7 @@
     <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
       <SidebarContent
         organizationsToChange={data.organizationsToChange}
-        menu={data.menu}
+        menuPages={data.menuPages}
         userFirstName={data.userFirstName}
       />
     </div>

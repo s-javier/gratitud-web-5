@@ -1,16 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { page } from '$app/state'
+  import Icon from '@iconify/svelte'
   import { BuildingOutline, ChevronDownOutline, ChevronUpOutline } from 'flowbite-svelte-icons'
   import { ArrowRightStartOnRectangle } from 'svelte-heros-v2'
   import { overlayLoader } from '~/stores/loader.svelte'
   import { toast } from 'svoast'
   import { applyAction, enhance } from '$app/forms'
   import type { ActionResult } from '@sveltejs/kit'
-  import Icon from './Icon.svelte'
   import { fade, scale } from 'svelte/transition'
 
-  let { organizationsToChange, menu, userFirstName } = $props()
+  let { organizationsToChange, menuPages, userFirstName } = $props()
   let isOpenOrganizations = $state(false)
   let organizationsRef: HTMLElement | null = $state(null)
   let isOpenUser = $state(false)
@@ -125,17 +125,20 @@
     {/if}
     <li>
       <ul role="list" class="-mx-2 space-y-1">
-        {#each menu as menu}
+        {#each menuPages as item}
           <li>
             <a
-              href={menu.path}
+              href={item.path}
               class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold {page.url
-                .pathname === menu.path
+                .pathname === item.path
                 ? 'bg-gray-50 text-(--o-btn-primary-bg-color)'
                 : 'text-gray-700 hover:bg-gray-50 hover:text-(--o-btn-primary-bg-color)'}"
             >
-              <Icon title={menu.title} />
-              {menu.title}
+              <Icon
+                icon={item.icon}
+                class="size-6 shrink-0 text-gray-400 group-hover:text-(--o-btn-primary-bg-color)"
+              />
+              {item.title}
             </a>
           </li>
         {/each}

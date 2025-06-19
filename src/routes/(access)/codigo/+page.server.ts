@@ -41,8 +41,8 @@ export const actions = {
         error: result.data.error,
       }
     }
-    console.log('token', result.data.token)
-    event.cookies.set('token', result.data.token, { path: '/' })
-    redirect(303, Page.ADMIN_WELCOME)
+    console.log('token', result.data)
+    event.cookies.set('token', result.data, { path: '/' })
+    redirect(303, Page.WELCOME)
   },
 }

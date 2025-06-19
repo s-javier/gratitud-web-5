@@ -14,7 +14,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
   }
 
   if ([Page.LOGIN, Page.CODE].includes(event.url.pathname) && event.cookies.get('token')) {
-    redirect(303, Page.ADMIN_WELCOME)
+    redirect(303, Page.WELCOME)
   }
 
   /**
@@ -44,7 +44,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
         event.locals.error = result.data.error
       }
     } else if (path !== '/welcome' && result.data.isRedirectToWelcome) {
-      redirect(303, Page.ADMIN_WELCOME)
+      redirect(303, Page.WELCOME)
     } else {
       event.locals = {
         error: null,
