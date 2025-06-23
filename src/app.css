@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* @import 'tabulator-tables/dist/css/tabulator.min.css'; */
+@import 'tabulator-tables/dist/css/tabulator_bulma.min.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -204,4 +206,26 @@
 */
 .svoast-container {
   z-index: 1500 !important;
+}
+
+.tabulator-col-content {
+  background-color: var(--color-pink-400) !important;
+}
+.tabulator-col-title {
+  color: white;
+  font-weight: normal;
+}
+.tabulator-arrow {
+  border-bottom-color: vat(--color-pink-400) !important;
+}
+.tabulator
+  .tabulator-header
+  .tabulator-col.tabulator-sortable[aria-sort='ascending']
+  .tabulator-col-content
+  .tabulator-col-sorter
+  .tabulator-arrow {
+  border-bottom-color: white !important;
+}
+.tabulator-row {
+  cursor: auto !important;
 }
