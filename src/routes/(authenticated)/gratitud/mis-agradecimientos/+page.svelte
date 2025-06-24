@@ -7,51 +7,48 @@
     // @ts-ignore
   } from 'tabulator-tables'
 
+  let { data }: any = $props()
   let tableElement: HTMLDivElement
   let selectedRow: any = $state(null)
   let tabulatorMenu: any = $state(null)
 
-  const tabledata = [
-    { id: 1, name: 'Oli Bob', age: '12', col: 'red', dob: '' },
-    { id: 2, name: 'Mary May', age: '1', col: 'blue', dob: '14/05/1982' },
-    { id: 3, name: 'Christine Lobowski', age: '42', col: 'green', dob: '22/05/1982' },
-    { id: 4, name: 'Brendon Philips', age: '125', col: 'orange', dob: '01/08/1980' },
-    { id: 5, name: 'Margret Marmajuke', age: '16', col: 'yellow', dob: '31/01/1999' },
-  ]
-
   const tableColumns = [
-    { title: 'Name', field: 'name', width: 150, resizable: false },
-    { title: 'Age', field: 'age', hozAlign: 'left', formatter: 'progress', resizable: false },
-    { title: 'Favourite Color', field: 'col', resizable: false },
-    { title: 'Date Of Birth', field: 'dob', sorter: 'date', hozAlign: 'center', resizable: false },
+    { resizable: false, title: 'Título', field: 'title', headerFilter: true },
     {
-      hozAlign: 'center',
-      headerSort: false,
       resizable: false,
-      formatter: function (
-        cell: CellComponent,
-        formatterParams: any,
-        onRendered: (callback: () => void) => void,
-      ) {
-        return `<div id="row-${cell.getRow().getData().id}" class="bg-red-500">${cell.getRow().getData().id}</div>`
-      },
-      clickMenu: [
-        {
-          label: 'Reset Value',
-          action: function (e: Event, cell: CellComponent) {
-            cell.setValue('')
-          },
-        },
-        {
-          label: 'Set Value',
-        },
-      ],
+      title: 'Description',
+      field: 'description',
+      width: 400,
+      headerFilter: true,
     },
+    // {
+    //   hozAlign: 'center',
+    //   headerSort: false,
+    //   resizable: false,
+    //   formatter: function (
+    //     cell: CellComponent,
+    //     formatterParams: any,
+    //     onRendered: (callback: () => void) => void,
+    //   ) {
+    //     return `<div id="row-${cell.getRow().getData().id}" class="bg-red-500">${cell.getRow().getData().id}</div>`
+    //   },
+    //   clickMenu: [
+    //     {
+    //       label: 'Reset Value',
+    //       action: function (e: Event, cell: CellComponent) {
+    //         cell.setValue('')
+    //       },
+    //     },
+    //     {
+    //       label: 'Set Value',
+    //     },
+    //   ],
+    // },
   ]
 
   onMount(async () => {
     const table = new Tabulator(tableElement, {
-      data: tabledata,
+      data: data.gratitude ?? [],
       reactiveData: true, //enable data reactivity
       columns: tableColumns,
       responsiveLayout: true,
