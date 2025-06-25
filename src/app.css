@@ -208,6 +208,9 @@
   z-index: 1500 !important;
 }
 
+/**
+ * Tabulator
+ */
 .tabulator-col-content {
   background-color: var(--color-pink-400) !important;
 }

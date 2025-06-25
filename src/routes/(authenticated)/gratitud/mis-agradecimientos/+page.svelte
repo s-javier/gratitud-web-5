@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { Button } from 'noph-ui'
+  import Icon from '@iconify/svelte'
   import {
     TabulatorFull as Tabulator,
     type RowComponent,
@@ -9,17 +11,20 @@
 
   let { data }: any = $props()
   let tableElement: HTMLDivElement
+  let table: any
   let selectedRow: any = $state(null)
   let tabulatorMenu: any = $state(null)
+  let isInitFilter = $state(false)
+  let isFilter = $state(false)
 
   const tableColumns = [
-    { resizable: false, title: 'Título', field: 'title', headerFilter: true },
+    { resizable: false, title: 'Título', field: 'title' },
     {
       resizable: false,
       title: 'Description',
       field: 'description',
       width: 400,
-      headerFilter: true,
+      // headerFilter: true,
     },
     // {
     //   hozAlign: 'center',
@@ -47,7 +52,7 @@
   ]
 
   onMount(async () => {
-    const table = new Tabulator(tableElement, {
+    table = new Tabulator(tableElement, {
       data: data.gratitude ?? [],
       reactiveData: true, //enable data reactivity
       columns: tableColumns,
@@ -93,6 +98,17 @@
       selectedRow = null
     }
   }
+
+  $effect(() => {
+    if (isInitFilter === false) {
+      return
+    }
+    let columns = table.getColumnDefinitions()
+    columns = columns.map((col: any) => {
+      return { ...col, headerFilter: isFilter }
+    })
+    table.setColumns(columns)
+  })
 </script>
 
 <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
@@ -102,8 +118,26 @@
   role="presentation"
   class="mt-6 mb-10 w-full border-t border-zinc-950/10 dark:border-white/10"
 />
-<p>Hola.</p>
+
+<div class="mb-4 flex items-center justify-end">
+  <Button
+    onclick={() => {
+      isInitFilter = true
+      isFilter = !isFilter
+    }}
+    variant="filled"
+    class="px-1! text-center!"
+    --np-filled-button-container-color="var(--o-btn-primary-bg-color)"
+    --np-filled-button-container-height="32px"
+    --np-filled-button-container-shape="4px"
+  >
+    <Icon
+      icon="mdi:filter-outline"
+      class="size-5 shrink-0  group-hover:text-(--o-btn-primary-bg-color)"
+    />
+  </Button>
+</div>
 
 <div class="flex justify-center">
-  <div bind:this={tableElement}></div>
+  <div bind:this={tableElement}>Cargando...</div>
 </div>
