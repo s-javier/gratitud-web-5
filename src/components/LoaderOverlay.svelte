@@ -3,7 +3,7 @@
   import { overlayLoader } from '~/stores/loader.svelte'
 </script>
 
-<Overlay type="dialog" isActive={overlayLoader.is} zIndex="z-1600">
+<Overlay type="dialog" status={overlayLoader.is} zIndex="z-1600">
   <svg viewBox="0 0 24 24" class="max-w-36 fill-(--o-overlay-loader)">
     <path
       class="spinner_Uvk8"

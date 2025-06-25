@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
-  import { XMark } from 'svelte-heros-v2'
+  import Icon from '@iconify/svelte'
 
   const props: {
     close: () => void
@@ -40,7 +40,7 @@
         onclick={() => props.close()}
       >
         <span class="sr-only">Close</span>
-        <XMark class="size-4 shrink-0" />
+        <Icon icon="mdi:window-close" class="size-4 shrink-0" />
       </button>
     </div>
   </header>

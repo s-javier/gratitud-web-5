@@ -11,6 +11,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
 
   if (NODE_ENV === 'development') {
     console.info('->', event.request.method, event.route.id, event.url.pathname)
+    console.info(`${event.url.pathname}${event.request.method === 'POST' ? event.url.search : ''}`)
   }
 
   if ([Page.LOGIN, Page.CODE].includes(event.url.pathname) && event.cookies.get('token')) {
@@ -20,7 +21,7 @@ export async function handle({ event, resolve }: { event: RequestEvent; resolve:
   /**
    * Validar autenticación y permisos.
    */
-  const path = event.url.pathname
+  const path = `${event.url.pathname}${event.request.method === 'POST' ? event.url.search : ''}`
   if (path === '/welcome' || path.startsWith('/gratitud')) {
     const sessionId = event.cookies.get('token')
 

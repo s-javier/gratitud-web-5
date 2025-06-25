@@ -3,7 +3,7 @@
   import type { Snippet } from 'svelte'
 
   const props: {
-    isActive: boolean
+    status: boolean
     children: Snippet
     type: 'dialog' | 'sidebar'
     width?: string
@@ -45,7 +45,7 @@
   }
 
   $effect(() => {
-    if (props.isActive) {
+    if (props.status) {
       is = true
       openOverlay()
     } else {
