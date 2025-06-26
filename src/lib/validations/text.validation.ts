@@ -11,15 +11,15 @@ type Input = {
 }
 
 export const validateText = (input: Input) => {
-  let textErr: any
+  let valueErr: any
 
   if (input.options.isPossibleEmpty && input.value.length === 0) {
-    textErr = v.safeParse(
+    valueErr = v.safeParse(
       v.pipe(v.string('El valor de este campo es inválido.'), v.trim()),
       input.value,
     )
   } else if (input.options.minLength && input.options.maxLength) {
-    textErr = v.safeParse(
+    valueErr = v.safeParse(
       v.pipe(
         v.string('El valor de este campo es inválido.'),
         v.trim(),
@@ -31,9 +31,9 @@ export const validateText = (input: Input) => {
     )
   }
 
-  if (textErr.issues) {
-    const result: any = { error: {} }
-    result.error[input.label] = textErr.issues[0].message
+  if (valueErr.issues) {
+    const result: any = {}
+    result[input.label] = valueErr.issues[0].message
     throw new Error(JSON.stringify(result))
   }
 }

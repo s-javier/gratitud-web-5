@@ -19,9 +19,7 @@ export const createGratitude = async (input: Input) => {
   } catch (e: any) {
     rollbar.error('Error de DB. createGratitude.', e)
     throw new Error(
-      JSON.stringify({
-        error: { server: 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.' },
-      }),
+      JSON.stringify({ server: 'Hubo un error. Por favor, inténtalo de nuevo o más tarde.' }),
     )
   }
 }

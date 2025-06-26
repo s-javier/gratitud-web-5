@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import type { ActionResult } from '@sveltejs/kit'
-  import { enhance } from '$app/forms'
+  import { applyAction, enhance } from '$app/forms'
   import { invalidateAll } from '$app/navigation'
   import { Button, TextField } from 'noph-ui'
   import { toast } from 'svoast'
@@ -18,21 +18,32 @@
   }: {
     type: string /* adding o editing */
     isOpen: boolean
-    row?: {
+    data?: {
       id: string
       title: string
-      status: boolean
+      description: string
     } | null
   } = $props()
 
-  let titleRef = $state() as HTMLInputElement
   let titleErr = $state('')
   let descriptionRef = $state() as HTMLTextAreaElement
   let descriptionErr = $state('')
 
+  /* ▼ Exclusivo de la edición */
+  let title = $state('')
+  let description = $state('')
+
+  $effect(() => {
+    if (props.data && props.type === 'editing') {
+      title = props.data.title
+      description = props.data.description
+    }
+  })
+  /* ▲ Exclusivo de la edición */
+
   $effect(() => {
     if (isOpen && props.type === 'adding') {
-      tick().then(() => titleRef.focus())
+      tick().then(() => descriptionRef.focus())
     }
   })
 </script>
@@ -42,7 +53,7 @@
     title={props.type === 'editing' ? 'Edición de agradecimiento' : 'Nuevo agradecimiento'}
     close={() => (isOpen = false)}
   >
-    {#if isOpen === true}
+    {#if isOpen}
       <form
         id="form-gratitude-ae"
         class=""
@@ -54,6 +65,7 @@
           return async ({ result }: { result: ActionResult }) => {
             // const sort = props.table.getState().sort
             // const filter = props.table.getState().filter
+            await applyAction(result) /* Para que redirija en caso de no tener permiso */
             await invalidateAll()
             overlayLoader.is = false
             if ('data' in result && result.data?.error) {
@@ -65,6 +77,10 @@
               }
               if (result.data?.error?.title || result.data?.error?.description) {
                 toast.error('Por favor, corrige el formulario.', { closable: true })
+              } else if (result.data.error?.gratitudeId) {
+                toast.error('Hubo un error. Por favor, recarga la página para corregirlo.', {
+                  closable: true,
+                })
               }
               if (result.data?.error?.server) {
                 toast.error(result.data.error.server, { closable: true, infinite: true })
@@ -76,8 +92,11 @@
           }
         }}
       >
+        {#if props.type === 'editing'}
+          <input type="hidden" name="id" value={props.data!.id} />
+        {/if}
         <TextField
-          bind:inputElement={titleRef}
+          bind:value={title}
           type="text"
           label="Título"
           name="title"
@@ -98,6 +117,7 @@
           {/snippet}
         </TextField>
         <TextField
+          bind:value={description}
           bind:inputElement={descriptionRef}
           oninput={() => autoResize(descriptionRef)}
           class="w-full"

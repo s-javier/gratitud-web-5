@@ -6,7 +6,7 @@
   import {
     TabulatorFull as Tabulator,
     type RowComponent,
-    type CellComponent,
+    // type CellComponent,
     // @ts-ignore
   } from 'tabulator-tables'
   // @ts-ignore
@@ -14,16 +14,16 @@
 
   import { clearHighlight } from '~/lib'
   import GratitudeAE from './GratitudeAE.svelte'
+  import GratitudeDelete from './GratitudeDelete.svelte'
 
   const props: any = $props()
-  let totalData = props.data?.gratitude?.length ?? 0
 
   let search = $state('')
   let tableStatus = false
   let tableElement: HTMLDivElement | null = null
   let table: Tabulator | null = null
   let rowsDisplayed = $state(0)
-  let selectedRow: RowComponent = $state(null)
+  let selectedRow: RowComponent | null = $state(null)
   let tabulatorMenu: any = $state(null)
   let isFilter = $state(false)
 
@@ -122,15 +122,14 @@
         {
           label: 'Editar',
           action: function (e: Event, row: RowComponent) {
-            row.delete()
-            // clearHighlight(selectedRow)
+            isEditing = true
           },
         },
         {
           label: 'Eliminar',
           action: function (e: Event, row: RowComponent) {
-            row.delete()
-            // clearHighlight(selectedRow)
+            // row.delete()
+            isDeleting = true
           },
         },
       ],
@@ -172,7 +171,14 @@
     if (isFilter || tableStatus) {
       let columns = table.getColumnDefinitions()
       columns = columns.map((col: any) => {
-        return { ...col, headerFilter: isFilter }
+        if ('field' in col) {
+          if (col.field === 'description' && isFilter) {
+            return { ...col, headerFilter: 'input' }
+          }
+          return { ...col, headerFilter: isFilter }
+        } else {
+          return col
+        }
       })
       table.setColumns(columns)
     }
@@ -184,6 +190,7 @@
         [
           { field: 'title', type: 'like', value: search },
           { field: 'description', type: 'like', value: search },
+          { field: 'created_at', type: 'like', value: search },
         ],
       ])
     }
@@ -200,7 +207,6 @@
   <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
     Mis agradecimientos
   </h1>
-  <Button onclick={() => console.log(props.data.gratitude)}>Test</Button>
   <Button
     variant="filled"
     class="text-center! text-base!"
@@ -286,3 +292,5 @@
 </div>
 
 <GratitudeAE type="adding" bind:isOpen={isAdding} />
+<GratitudeAE type="editing" bind:isOpen={isEditing} data={selectedRow?.getData()} />
+<GratitudeDelete bind:isOpen={isDeleting} data={selectedRow?.getData()} />
