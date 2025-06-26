@@ -14,14 +14,14 @@
 
   import { clearHighlight } from '~/lib'
   import GratitudeAE from './GratitudeAE.svelte'
-  import { time } from 'drizzle-orm/mysql-core'
 
-  let { data }: any = $props()
+  const props: any = $props()
+  let totalData = props.data?.gratitude?.length ?? 0
 
   let search = $state('')
-  let isInitTable = $state(false)
+  let tableStatus = false
   let tableElement: HTMLDivElement | null = null
-  let table: Tabulator | null = $state(null)
+  let table: Tabulator | null = null
   let rowsDisplayed = $state(0)
   let selectedRow: RowComponent = $state(null)
   let tabulatorMenu: any = $state(null)
@@ -32,12 +32,21 @@
   let isDeleting = $state(false)
 
   const tableColumns = [
-    { resizable: false, title: 'Título', field: 'title' },
+    {
+      resizable: false,
+      formatter: 'rownum',
+      headerSort: false,
+      hozAlign: 'right',
+      vertAlign: 'middle',
+    },
+    { resizable: true, title: 'Título', field: 'title', minWidth: 150, vertAlign: 'middle' },
     {
       resizable: false,
       title: 'Description',
       field: 'description',
-      width: 400,
+      formatter: 'textarea',
+      minWidth: 300,
+      maxWidth: 400,
     },
     {
       resizable: false,
@@ -85,11 +94,30 @@
       dependencies: {
         DateTime: DateTime,
       },
-      layout: 'fitColumns',
-      data: data.gratitude ?? [],
-      reactiveData: true, //enable data reactivity
+      height: '450px',
+      layout: 'fitData',
+      responsiveLayout: 'collapse',
+      placeholder: 'Sin agradecimientos',
+      reactiveData: true,
+      data: props.data.gratitude ?? [],
+
+      headerSortClickElement: 'icon',
+      initialSort: [{ column: 'created_at', dir: 'desc' }],
+
+      selectableRange: 1,
+      selectableRangeColumns: true,
+      selectableRangeRows: true,
+      selectableRangeClearCells: true,
+
+      clipboard: true,
+      clipboardCopyStyled: false,
+      clipboardCopyConfig: {
+        rowHeaders: false,
+        columnHeaders: false,
+      },
+      clipboardCopyRowRange: 'range',
+
       columns: tableColumns,
-      responsiveLayout: true,
       rowContextMenu: [
         {
           label: 'Editar',
@@ -116,7 +144,7 @@
       console.log(row.getData())
     })
     table.on('tableBuilt', function () {
-      isInitTable = true
+      tableStatus = true
     })
     table.on('dataFiltered', function (_: any, rows: RowComponent[]) {
       rowsDisplayed = rows.length
@@ -141,7 +169,7 @@
   })
 
   $effect(() => {
-    if (isInitTable) {
+    if (isFilter || tableStatus) {
       let columns = table.getColumnDefinitions()
       columns = columns.map((col: any) => {
         return { ...col, headerFilter: isFilter }
@@ -151,7 +179,7 @@
   })
 
   $effect(() => {
-    if (isInitTable) {
+    if (search.length >= 0 && tableStatus) {
       table.setFilter([
         [
           { field: 'title', type: 'like', value: search },
@@ -160,12 +188,19 @@
       ])
     }
   })
+
+  $effect(() => {
+    if (props.data.gratitude && tableStatus) {
+      table.replaceData(props.data.gratitude)
+    }
+  })
 </script>
 
 <div class="flex items-center justify-between">
   <h1 class="text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white">
     Mis agradecimientos
   </h1>
+  <Button onclick={() => console.log(props.data.gratitude)}>Test</Button>
   <Button
     variant="filled"
     class="text-center! text-base!"
@@ -185,11 +220,11 @@
 <div class="mb-4 flex items-center justify-between gap-x-4">
   <div class="text-sm text-gray-500">
     <p>
-      {data?.gratitude?.length === 1 ? 'Existe' : 'Existen'}
-      {data?.gratitude?.length ?? 0}
-      {data?.gratitude?.length === 1 ? 'agradecimiento' : 'agradecimientos'}.
+      {props.data?.gratitude?.length === 1 ? 'Existe' : 'Existen'}
+      {props.data?.gratitude?.length ?? 0}
+      {props.data?.gratitude?.length === 1 ? 'agradecimiento' : 'agradecimientos'}.
     </p>
-    {#if isInitTable && rowsDisplayed < data?.gratitude?.length}
+    {#if rowsDisplayed < props.data?.gratitude?.length && tableStatus}
       <p transition:fade>
         Estás viendo {rowsDisplayed}
         {table.getRows().length === 1 ? 'agradecimiento' : 'agradecimientos'}.

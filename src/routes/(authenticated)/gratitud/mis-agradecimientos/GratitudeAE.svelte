@@ -1,7 +1,8 @@
 <script lang="ts">
   import { tick } from 'svelte'
-  import { applyAction, enhance } from '$app/forms'
   import type { ActionResult } from '@sveltejs/kit'
+  import { enhance } from '$app/forms'
+  import { invalidateAll } from '$app/navigation'
   import { Button, TextField } from 'noph-ui'
   import { toast } from 'svoast'
   import Icon from '@iconify/svelte'
@@ -53,7 +54,7 @@
           return async ({ result }: { result: ActionResult }) => {
             // const sort = props.table.getState().sort
             // const filter = props.table.getState().filter
-            await applyAction(result)
+            await invalidateAll()
             overlayLoader.is = false
             if ('data' in result && result.data?.error) {
               if (result.data?.error?.title) {
@@ -102,7 +103,7 @@
           class="w-full"
           error={descriptionErr.length > 0}
           errorText={descriptionErr}
-          label="Descripción"
+          label="Descripción*"
           name="description"
           type="textarea"
           variant="outlined"
