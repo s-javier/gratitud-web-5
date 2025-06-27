@@ -18,6 +18,7 @@
   }: {
     type: string /* adding o editing */
     isOpen: boolean
+    title: string
     data?: {
       id: string
       title: string
@@ -49,10 +50,7 @@
 </script>
 
 <Overlay type="dialog" status={isOpen} width="max-w-[500px]">
-  <Modal
-    title={props.type === 'editing' ? 'Edición de agradecimiento' : 'Nuevo agradecimiento'}
-    close={() => (isOpen = false)}
-  >
+  <Modal title={props.title} close={() => (isOpen = false)}>
     {#if isOpen}
       <form
         id="form-gratitude-ae"

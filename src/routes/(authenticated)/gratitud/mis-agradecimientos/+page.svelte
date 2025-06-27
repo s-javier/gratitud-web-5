@@ -175,7 +175,7 @@
       let columns = table.getColumnDefinitions()
       columns = columns.map((col: any) => {
         if ('field' in col) {
-          if (col.field === 'description' && isFilter) {
+          if (['description', 'created_at'].includes(col.field) && isFilter) {
             return { ...col, headerFilter: 'input' }
           }
           return { ...col, headerFilter: isFilter }
@@ -294,7 +294,16 @@
   <div bind:this={tableElement}>Cargando...</div>
 </div>
 
-<GratitudeView bind:isOpen={isViewing} data={selectedRow?.getData()} />
-<GratitudeAE type="adding" bind:isOpen={isAdding} />
-<GratitudeAE type="editing" bind:isOpen={isEditing} data={selectedRow?.getData()} />
-<GratitudeDelete bind:isOpen={isDeleting} data={selectedRow?.getData()} />
+<GratitudeView bind:isOpen={isViewing} title="Agradecimiento" data={selectedRow?.getData()} />
+<GratitudeAE type="adding" bind:isOpen={isAdding} title="Nuevo agradecimiento" />
+<GratitudeAE
+  type="editing"
+  bind:isOpen={isEditing}
+  title="Edición de agradecimiento"
+  data={selectedRow?.getData()}
+/>
+<GratitudeDelete
+  bind:isOpen={isDeleting}
+  title="Eliminación de agradecimiento"
+  data={selectedRow?.getData()}
+/>

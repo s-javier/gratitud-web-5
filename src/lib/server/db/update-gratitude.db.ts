@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
-
 import { sql } from './db'
 import { rollbar } from '~/lib/server/rollbar'
 

@@ -14,7 +14,10 @@ import { validateBooleanTrue, validateText, validateUUIDV4 } from '~/lib/validat
 export async function load(event: RequestEvent) {
   let gratitude: Gratitude[]
   try {
-    gratitude = await readGratitudeByUserId({ userId: event.locals.userId || '' })
+    gratitude = await readGratitudeByUserId({
+      userId: event.locals.userId || '',
+      isMaterialized: true,
+    })
   } catch (error: any) {
     return { error: JSON.parse(error.message) }
   }
@@ -38,7 +41,12 @@ export const actions = {
         value: description,
         options: { minLength: 5, maxLength: 200 },
       })
-      await createGratitude({ userId: event.locals.userId || '', title, description })
+      await createGratitude({
+        userId: event.locals.userId || '',
+        title,
+        description,
+        isMaterialized: true,
+      })
     } catch (err: any) {
       return { error: JSON.parse(err.message) }
     }

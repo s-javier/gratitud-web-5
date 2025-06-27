@@ -12,6 +12,7 @@
     ...props
   }: {
     isOpen: boolean
+    title: string
     data: {
       title: string
       description: string
@@ -22,7 +23,7 @@
 </script>
 
 <Overlay type="dialog" status={isOpen} width="max-w-[500px]">
-  <Modal title="Agradecimiento" close={() => (isOpen = false)}>
+  <Modal title={props.title} close={() => (isOpen = false)}>
     {#if props.data}
       <div class="border-t border-gray-100">
         <dl class="divide-y divide-gray-100">
@@ -41,14 +42,14 @@
           <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt class="text-sm/6 font-medium text-gray-900">Creación</dt>
             <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
-              {DateTime.fromISO(props.data?.created_at).toFormat('yyyy-MM-dd HH:mm')}
+              {DateTime.fromISO(props.data?.created_at).toFormat('dd MMM yyyy HH:mm')}
             </dd>
           </div>
           <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
             <dt class="text-sm/6 font-medium text-gray-900">Actualización</dt>
             <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
               {props.data?.updated_at
-                ? DateTime.fromISO(props.data?.updated_at).toFormat('yyyy-MM-dd HH:mm')
+                ? DateTime.fromISO(props.data?.updated_at).toFormat('dd MMM yyyy HH:mm')
                 : 'Sin actualización'}
             </dd>
           </div>

@@ -15,6 +15,7 @@
     ...props
   }: {
     isOpen: boolean
+    title: string
     data: {
       id: string
       title: string
@@ -38,7 +39,7 @@
 </script>
 
 <Overlay type="dialog" status={isOpen} width="max-w-[500px]">
-  <Modal title="Eliminación de agradecimiento" close={() => (isOpen = false)}>
+  <Modal title={props.title} close={() => (isOpen = false)}>
     {#if props.data}
       <section class="mb-6">
         <p class="mb-2 text-base leading-relaxed text-gray-500 dark:text-gray-400">

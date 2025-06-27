@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { sql } from './db'
 import { rollbar } from '~/lib/server/rollbar'
 
-type Input = { userId: string; title: string; description: string }
+type Input = { userId: string; title: string; description: string; isMaterialized: boolean }
 
 export const createGratitude = async (input: Input) => {
   try {
@@ -12,7 +12,7 @@ export const createGratitude = async (input: Input) => {
         (id, user_id, title, description, created_at, is_materialized)
       VALUES
         (
-          ${uuidv4()}, ${input.userId}, ${input.title}, ${input.description}, ${new Date().toISOString()}, true
+          ${uuidv4()}, ${input.userId}, ${input.title}, ${input.description}, ${new Date().toISOString()}, ${input.isMaterialized}
         )
     `
   } catch (e: any) {
