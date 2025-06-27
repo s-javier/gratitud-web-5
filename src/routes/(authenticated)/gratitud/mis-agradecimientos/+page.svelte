@@ -13,6 +13,7 @@
   import { DateTime } from 'luxon'
 
   import { clearHighlight } from '~/lib'
+  import GratitudeView from './GratitudeView.svelte'
   import GratitudeAE from './GratitudeAE.svelte'
   import GratitudeDelete from './GratitudeDelete.svelte'
 
@@ -27,6 +28,7 @@
   let tabulatorMenu: any = $state(null)
   let isFilter = $state(false)
 
+  let isViewing = $state(false)
   let isAdding = $state(false)
   let isEditing = $state(false)
   let isDeleting = $state(false)
@@ -140,7 +142,8 @@
       selectedRow = row
     })
     table.on('rowDblClick', function (e: Event, row: RowComponent) {
-      console.log(row.getData())
+      selectedRow = row
+      isViewing = true
     })
     table.on('tableBuilt', function () {
       tableStatus = true
@@ -291,6 +294,7 @@
   <div bind:this={tableElement}>Cargando...</div>
 </div>
 
+<GratitudeView bind:isOpen={isViewing} data={selectedRow?.getData()} />
 <GratitudeAE type="adding" bind:isOpen={isAdding} />
 <GratitudeAE type="editing" bind:isOpen={isEditing} data={selectedRow?.getData()} />
 <GratitudeDelete bind:isOpen={isDeleting} data={selectedRow?.getData()} />

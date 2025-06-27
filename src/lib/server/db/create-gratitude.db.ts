@@ -6,14 +6,13 @@ import { rollbar } from '~/lib/server/rollbar'
 type Input = { userId: string; title: string; description: string }
 
 export const createGratitude = async (input: Input) => {
-  const title = input.title ? input.title : null
   try {
     await sql`
       INSERT INTO gratitude
-        (id, user_id, title, description, created_at)
+        (id, user_id, title, description, created_at, is_materialized)
       VALUES
         (
-          ${uuidv4()}, ${input.userId}, ${title}, ${input.description}, ${new Date().toISOString()}
+          ${uuidv4()}, ${input.userId}, ${input.title}, ${input.description}, ${new Date().toISOString()}, true
         )
     `
   } catch (e: any) {

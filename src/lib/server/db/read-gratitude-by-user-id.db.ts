@@ -10,9 +10,14 @@ export const readGratitudeByUserId = async (input: { userId: string }) => {
   let query: any[] = []
   try {
     query = await sql`
-      SELECT id, title, description, TO_CHAR(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS created_at
+      SELECT
+        id,
+        title,
+        description,
+        TO_CHAR(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS created_at,
+        TO_CHAR(updated_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS updated_at
       FROM gratitude
-      WHERE user_id = ${input.userId} AND is_materialized IS NULL
+      WHERE user_id = ${input.userId} AND is_materialized = true
     `
   } catch (e: any) {
     rollbar.error('Error en DB. readGratitudeByUserId.', e)
